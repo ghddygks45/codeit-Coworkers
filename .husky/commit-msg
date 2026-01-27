@@ -1,9 +1,0 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-MSG=$(cat "$1")
-
-if echo "$MSG" | grep -q '[A-Z]'; then
-  echo "❌ 커밋 메시지는 소문자만 허용"
-  exit 1
-fi
