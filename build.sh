@@ -2,5 +2,5 @@
 
 cd ../
 mkdir output
-cp -R ./codeit-coworkers/* ./output
-cp -R ./output ./codeit-coworkers/
+cp -R ./codeit-Coworkers/* ./output
+cp -R ./output ./codeit-Coworkers/
