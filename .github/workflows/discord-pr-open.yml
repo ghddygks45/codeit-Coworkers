@@ -1,0 +1,42 @@
+name: Notify Discord on PR Open (Full Body)
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      # jq 설치 (신경 쓸 필요 없음)
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          BODY="${PR_BODY:-내용 없음}"
+
+          curl -X POST -H "Content-Type: application/json" \
+          -d "$(jq -n \
+            --arg title "$PR_TITLE" \
+            --arg url "$PR_URL" \
+            --arg author "$AUTHOR" \
+            --arg body "$BODY" \
+            '{
+              "embeds": [
+                {
+                  "title": $title,
+                  "url": $url,
+                  "description": "**작성자:** \($author)\n\n\($body)",
+                  "color": 5763719
+                }
+              ]
+            }')" \
+          "$DISCORD_WEBHOOK_URL"
