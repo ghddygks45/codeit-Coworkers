@@ -1,0 +1,53 @@
+name: Notify Discord on PR Review
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Send message to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REVIEW_STATE: ${{ github.event.review.state }}
+          REVIEW_BODY: ${{ github.event.review.body }}
+          REVIEWER: ${{ github.event.review.user.login }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          echo "Sending PR Review notification to Discord..."
+
+          PAYLOAD=$(jq -n \
+            --arg content "**:mag: PR 리뷰가 작성되었습니다. **" \
+            --arg reviewer "$REVIEWER" \
+            --arg state "$REVIEW_STATE" \
+            --arg body "$REVIEW_BODY" \
+            --arg prtitle "$PR_TITLE" \
+            --arg prurl "$PR_URL" \
+            '{
+              "content": $content,
+              "embeds": [
+                {
+                  "title": $prtitle,
+                  "url": $prurl,
+                  "color": 3447003,
+                  "fields": [
+                    {"name": ":bust_in_silhouette: 리뷰어", "value": $reviewer, "inline": true},
+                    {"name": ":pushpin: 승인 여부", "value": $state, "inline": true},
+                    {"name": ":speech_balloon: 리뷰 내용", "value": ($body // "No comment")}
+                  ]
+                }
+              ]
+            }'
+          )
+
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "$PAYLOAD" \
+               "$DISCORD_WEBHOOK_URL"
