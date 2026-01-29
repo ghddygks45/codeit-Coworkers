@@ -1,6 +1,7 @@
-#!/bin/sh
+// ./build.sh 
 
+#!/bin/sh
 cd ../
 mkdir output
-cp -R ./codeit-Coworkers/* ./output
-cp -R ./output ./codeit-Coworkers/
+cp -R ./coworkers/* ./output
+cp -R ./output ./coworkers/
