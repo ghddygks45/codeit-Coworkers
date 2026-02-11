@@ -22,6 +22,8 @@ module.exports = {
           cyan: "#06B6D4",
           pink: "#EC4899",
           rose: "#F43F5E",
+          orange: "#F97316",
+          yellow: "#EAB308",
         },
 
         /* Background */
@@ -46,6 +48,7 @@ module.exports = {
         "color-default": "#64748B",
         "color-inverse": "#FFFFFF",
         "color-disabled": "#94A3B8",
+        "border-primary": "#E2E8F0",
 
         /* Status */
         status: {
@@ -54,14 +57,16 @@ module.exports = {
 
         /* Icon */
         icon: {
-          primary: "#E2E8F0",
-          inverse: "#E2E8F0",
+          primary: "#64748B",
+          inverse: "#F8FAFC",
           brand: "#74A1FB",
+          gnb: "#CBD5E1",
         },
       },
 
       fontSize: {
         "4xl-m": ["40px", { lineHeight: "48px", fontWeight: "500" }],
+        "4xl-b": ["40px", { lineHeight: "48px", fontWeight: "700" }],
 
         "3xl-b": ["32px", { lineHeight: "38px", fontWeight: "700" }],
         "3xl-sb": ["32px", { lineHeight: "38px", fontWeight: "600" }],
@@ -116,9 +121,19 @@ module.exports = {
             transform: "translateY(0)",
           },
         },
+        marqueeAnimation: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-100%)" },
+        },
+        progressPulse: {
+          "0%, 100%": { filter: "brightness(1.0)" },
+          "50%": { filter: "brightness(1.2)" },
+        },
       },
       animation: {
         fadeDown: "fadeDown 0.5s ease-out forwards",
+        marqueeAnimation: "marqueeAnimation 90s linear infinite",
+        "progress-pulse": "progressPulse 4s ease-in-out infinite",
       },
     },
   },

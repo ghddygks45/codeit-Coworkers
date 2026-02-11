@@ -1,0 +1,73 @@
+/* reset.css */
+/* Tailwind preflight 위에 얹는 최소 reset */
+
+@layer base {
+  /* box model */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  /* font */
+  body {
+    font-family: var(--font-pretendard);
+  }
+
+  /* margin reset */
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  figure,
+  blockquote,
+  dl,
+  dd {
+    margin: 0;
+  }
+
+  /* list reset */
+  ul,
+  ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* link reset */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* button reset */
+  button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  /* image */
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* form elements */
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+}

@@ -1,0 +1,60 @@
+### 회원가입
+POST https://fe-project-cowokers.vercel.app/20-3/auth/signup
+Content-Type: application/json
+
+{
+  "email": "testuser123@test.com",
+  "nickname": "테스트계정",
+  "password": "testuser123@",
+  "passwordConfirmation": "testuser123@"
+}
+
+### 로그인
+POST https://fe-project-cowokers.vercel.app/20-3/auth/signin
+Content-Type: application/json
+
+{
+  "email": "testuser123@test.com",
+  "password": "testuser123@"
+}
+
+// 회원정보
+{
+  "user": {
+    "id": 2750,
+    "nickname": "테스트계정",
+    "createdAt": "2026-01-31T16:04:40+09:00",
+    "updatedAt": "2026-01-31T16:04:40+09:00",
+    "image": null,
+    "teamId": "20-3",
+    "email": "testuser123@test.com"
+  },
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mjc1MCwidGVhbUlkIjoiMjAtMyIsInNjb3BlIjoiYWNjZXNzIiwiaWF0IjoxNzY5ODQzMTkyLCJleHAiOjE3Njk4NDY3OTIsImlzcyI6InNwLWNvd29ya2VycyJ9.TfDzeY6JWrDgp5CyqqmJmY_ldP4NlinfbsDlkrjz53c",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mjc1MCwidGVhbUlkIjoiMjAtMyIsInNjb3BlIjoicmVmcmVzaCIsImlhdCI6MTc2OTg0MzE5MiwiZXhwIjoxNzcwNDQ3OTkyLCJpc3MiOiJzcC1jb3dvcmtlcnMifQ.mpxYjy7UFnSpzR3wfXbXh5jpTS07qtLcpX7pscw7hro"
+}
+
+
+### 그룹(팀) 생성
+
+POST https://fe-project-cowokers.vercel.app/20-3/groups
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mjc1MCwidGVhbUlkIjoiMjAtMyIsInNjb3BlIjoiYWNjZXNzIiwiaWF0IjoxNzY5ODQzMTkyLCJleHAiOjE3Njk4NDY3OTIsImlzcyI6InNwLWNvd29ya2VycyJ9.TfDzeY6JWrDgp5CyqqmJmY_ldP4NlinfbsDlkrjz53c
+
+{
+  "image": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400&h=400&fit=crop",
+  "name": "팀 베타"
+}
+
+
+### 그룹(팀) 목록 조회
+GET https://fe-project-cowokers.vercel.app/20-3/user/groups
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mjc1MCwidGVhbUlkIjoiMjAtMyIsInNjb3BlIjoiYWNjZXNzIiwiaWF0IjoxNzY5ODQzMTkyLCJleHAiOjE3Njk4NDY3OTIsImlzcyI6InNwLWNvd29ya2VycyJ9.TfDzeY6JWrDgp5CyqqmJmY_ldP4NlinfbsDlkrjz53c
+
+
+### 그룹(팀) 삭제
+DELETE https://fe-project-cowokers.vercel.app/20-3/groups/3812
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mjc1MCwidGVhbUlkIjoiMjAtMyIsInNjb3BlIjoiYWNjZXNzIiwiaWF0IjoxNzY5ODQzMTkyLCJleHAiOjE3Njk4NDY3OTIsImlzcyI6InNwLWNvd29ya2VycyJ9.TfDzeY6JWrDgp5CyqqmJmY_ldP4NlinfbsDlkrjz53c
+
+
