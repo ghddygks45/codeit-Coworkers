@@ -3,7 +3,7 @@
 // Swagger: tasklist
 // ========================================
 
-import { TaskListServer } from "@/types/tasklist";
+import { TaskListServer } from "@/types/taskList";
 import { BASE_URL } from "./config";
 import { fetchClient } from "@/lib/fetchClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

@@ -98,7 +98,10 @@ export async function unlikeArticle(articleId: number): Promise<ArticleDetail> {
 
 // ─── React Query 훅 ────────────────────────────────────────
 
-export function useArticles(params: ArticleListParams = {}) {
+export function useArticles(
+  params: ArticleListParams = {},
+  options?: { enabled?: boolean },
+) {
   return useQuery<ArticleListResponse>({
     queryKey: ["articles", params],
     queryFn: () => getArticles(params),

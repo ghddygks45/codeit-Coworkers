@@ -1,6 +1,6 @@
 import { useUpdateTaskList } from "@/api/tasklist";
 import Close from "@/assets/close.svg";
-import { TaskListServer } from "@/types/tasklist";
+import { TaskListServer } from "@/types/taskList";
 import { Input } from "@/components/common/Input/Input";
 import { useState } from "react";
 import { useToastStore } from "@/stores/useToastStore";

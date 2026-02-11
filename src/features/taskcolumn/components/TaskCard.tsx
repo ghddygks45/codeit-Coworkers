@@ -1,7 +1,7 @@
 import Badge from "@/components/common/Badge/Badge";
 import Dropdown from "@/components/common/Dropdown/Dropdown";
 import Todo from "@/components/common/Todo/todo";
-import { TaskListServer } from "@/types/tasklist";
+import { TaskListServer } from "@/types/taskList";
 
 interface TaskCardProps {
   taskList: TaskListServer;

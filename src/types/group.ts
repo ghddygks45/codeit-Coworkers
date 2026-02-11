@@ -2,7 +2,7 @@
 // Group Types
 // ========================================
 
-import type { TaskListServer } from "./tasklist";
+import type { TaskListServer } from "./taskList";
 
 // 그룹 멤버
 export interface GroupMemberServer {

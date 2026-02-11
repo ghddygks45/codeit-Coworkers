@@ -66,10 +66,6 @@ export function useGroups() {
 export async function getCompletedTasks(): Promise<TaskDoneResponse> {
   return await fetchClient(`${BASE_URL}/user/history`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${TASKIFY_ACCESS_TOKEN}`,
-    },
   });
 }
 

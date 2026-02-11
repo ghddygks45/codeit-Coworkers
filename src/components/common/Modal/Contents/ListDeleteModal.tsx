@@ -1,7 +1,7 @@
 import { useDeleteTaskList } from "@/api/tasklist";
 import Alert from "@/assets/alert.svg";
 import { useToastStore } from "@/stores/useToastStore";
-import { TaskListServer } from "@/types/tasklist";
+import { TaskListServer } from "@/types/taskList";
 
 type ListDeleteModalProps = {
   onClose: () => void;

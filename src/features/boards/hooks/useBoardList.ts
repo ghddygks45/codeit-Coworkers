@@ -29,11 +29,11 @@ export interface UseBoardListReturn {
   handleSortChange: (item: { label: string; value: string }) => void;
 }
 
-const PAGE_SIZE_DESKTOP = 10;
-const PAGE_SIZE_MOBILE = 5;
+export const PAGE_SIZE_DESKTOP = 10;
+export const PAGE_SIZE_MOBILE = 5;
 
-type SortLabel = "최신순" | "좋아요 많은순";
-const SORT_MAP: Record<SortLabel, "recent" | "like"> = {
+export type SortLabel = "최신순" | "좋아요 많은순";
+export const SORT_MAP: Record<SortLabel, "recent" | "like"> = {
   최신순: "recent",
   "좋아요 많은순": "like",
 };

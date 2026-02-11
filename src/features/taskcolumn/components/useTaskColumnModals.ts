@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TaskListServer } from "@/types/tasklist";
+import { TaskListServer } from "@/types/taskList";
 
 export type ModalType = "ListCreate" | "ListEdit" | "ListDelete" | null;
 

@@ -40,7 +40,7 @@ export const router = createBrowserRouter([
         path: "/user/:id",
         element: <User />,
       },
-      ...testRoutes,
+      ...(import.meta.env.DEV ? testRoutes : []),
       {
         element: <Layout />,
         children: [
