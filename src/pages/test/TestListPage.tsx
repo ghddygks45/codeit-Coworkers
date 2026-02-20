@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Gnb from "@/components/gnb/Gnb";
+import Gnb from "@/components/layout/Gnb/Gnb";
 import Todo from "@/components/common/Todo/todo";
 import Badge from "@/components/common/Badge/Badge";
 import { Button } from "@/components/common/Button/Button";
@@ -118,7 +118,7 @@ export default function TestListPage() {
                     {item.d}
                   </span>
                   <div
-                    className={`flex h-11 w-11 items-center justify-center rounded-xl text-sm font-bold ${item.active ? "bg-[#334155] text-white shadow-lg" : "border border-gray-100 text-gray-600"}`}
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl text-sm font-bold ${item.active ? "bg-color-secondary text-white shadow-lg" : "border border-gray-100 text-gray-600"}`}
                   >
                     {item.n}
                   </div>

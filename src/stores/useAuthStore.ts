@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { queryClient } from "@/lib/queryClient";
 
 interface AuthStore {
   isLoggedIn: boolean;
@@ -29,6 +30,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   logout: () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    queryClient.clear();
     set({ isLoggedIn: false });
   },
 }));

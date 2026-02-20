@@ -32,7 +32,7 @@ export default function CarouselArrows({
         onClick={onPrev}
         disabled={disablePrev}
         aria-label="이전"
-        className={`${buttonSize} bg-background-primary flex items-center justify-center rounded-full border border-[#CBD5E1] transition-colors disabled:opacity-50`}
+        className={`${buttonSize} bg-background-primary border-border-secondary flex items-center justify-center rounded-full border transition-colors disabled:opacity-50`}
       >
         <svg
           width={iconSize}
@@ -57,7 +57,7 @@ export default function CarouselArrows({
         onClick={onNext}
         disabled={disableNext}
         aria-label="다음"
-        className={`${buttonSize} bg-background-primary flex items-center justify-center rounded-full border border-[#CBD5E1] transition-colors disabled:opacity-50`}
+        className={`${buttonSize} bg-background-primary border-border-secondary flex items-center justify-center rounded-full border transition-colors disabled:opacity-50`}
       >
         <svg
           width={iconSize}

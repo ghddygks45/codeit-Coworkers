@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
-import Gnb from "../gnb/Gnb";
-import { useGnbStore } from "../gnb/useGnbStore";
+import Gnb from "./Gnb/Gnb";
+import { useGnbStore } from "./Gnb/useGnbStore";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 
 export default function Layout() {
@@ -21,7 +21,7 @@ export default function Layout() {
           <Gnb />
         </div>
         <main
-          className="bg-background-secondary flex-1"
+          className="bg-background-primary min-w-0 flex-1"
           style={!isMobile ? { marginLeft: gnbWidth } : undefined}
         >
           {/* 각 페이지 랜더링 */}

@@ -1,7 +1,8 @@
-import { useCreateTaskList } from "@/api/tasklist";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Close from "@/assets/close.svg";
 import { useToastStore } from "@/stores/useToastStore";
 import { useState } from "react";
+import { createTaskList } from "@/api/tasklist";
 
 type ListCreateModalProps = {
   onClose: () => void;
@@ -12,51 +13,59 @@ export default function ListCreateModal({
   onClose,
   groupId,
 }: ListCreateModalProps) {
-  const { mutate: createList } = useCreateTaskList(groupId);
   const [name, setName] = useState("");
-
   const { show: showToast } = useToastStore();
+  const queryClient = useQueryClient();
+
+  // useCreateTaskList 훅 대신 직접 mutation 정의
+  const mutation = useMutation({
+    mutationFn: (listName: string) => createTaskList(groupId, listName),
+    // ListCreateModal 내 invalidateQueries 부분
+    onSuccess: () => {
+      showToast("목록이 생성되었습니다.");
+      queryClient.invalidateQueries({
+        queryKey: ["taskLists", Number(groupId)],
+      });
+      onClose();
+    },
+  });
 
   const handleCreate = () => {
-    createList(name);
-    showToast("목록이 생성되었습니다.");
-    onClose();
+    if (!name.trim()) {
+      showToast("목록 이름을 입력해주세요.");
+      return;
+    }
+    mutation.mutate(name);
   };
 
   return (
-    /* 기존 Fragment(<>) 대신 흰색 배경과 라운딩이 들어간 div로 감싸줍니다. 
-      w-[320px] md:w-[384px] 정도로 너비를 잡아주면 원본과 비슷합니다.
-    */
     <div className="bg-background-primary border-border-primary font-pretendard relative w-full rounded-3xl border p-6 shadow-xl md:w-[384px]">
-      {/* 1. 상단 닫기 버튼 영역 */}
-      <div className="flex w-full justify-end">
-        <Close
-          onClick={onClose}
-          className="text-icon-primary hover:text-color-primary cursor-pointer transition-colors"
-        />
+      <div className="-mb-2 flex w-full justify-end pt-2">
+        <Close onClick={onClose} className="cursor-pointer" />
       </div>
 
-      {/* 2. 콘텐츠 영역 */}
-      <div className="mt-2 flex flex-col gap-4">
-        <h2 className="text-xl-b text-color-primary text-center">할 일 목록</h2>
+      <div className="p-5">
+        <div className="flex flex-col gap-4">
+          <h2 className="text-lg-m text-color-primary">할 일 목록</h2>
 
-        <input
-          type="text"
-          className="text-md-r placeholder:text-color-disabled border-border-primary bg-background-secondary focus:border-brand-primary h-12 w-full rounded-xl border p-4 transition-all outline-none"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="목록 명을 입력해주세요."
-        />
+          <input
+            type="text"
+            className="placeholder-color-default border-border-primary mb-6 h-12 w-full rounded-xl border border-solid p-4"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="목록 명을 입력해주세요."
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleCreate();
+            }}
+          />
+        </div>
 
-        {/* 3. 버튼 영역 (w-full로 변경하여 박스 너비에 맞춤) */}
         <button
-          className="bg-brand-primary text-lg-b text-color-inverse hover:bg-interaction-hover active:bg-interaction-pressed mt-2 h-12 w-full rounded-xl text-center transition-colors"
-          onClick={() => {
-            // 만들기 로직...
-            handleCreate();
-          }}
+          className="bg-brand-primary text-lg-b text-color-inverse h-12 w-full rounded-xl text-center disabled:opacity-50"
+          onClick={handleCreate}
+          disabled={mutation.isPending}
         >
-          만들기
+          {mutation.isPending ? "생성 중..." : "만들기"}
         </button>
       </div>
     </div>

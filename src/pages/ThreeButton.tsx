@@ -1,8 +1,6 @@
-"use client";
-
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useState, useRef } from "react";
-import { RoundedBox, Text } from "@react-three/drei";
+import { RoundedBox, Text, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 
 function Scene() {
@@ -10,22 +8,15 @@ function Scene() {
   const [clicked, setClicked] = useState(false);
   const meshRef = useRef<THREE.Mesh>(null);
 
-  useFrame(() => {
+  useFrame((state) => {
     if (meshRef.current) {
-      const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
-      const width = typeof window !== "undefined" ? window.innerWidth : 1024;
+      const t = state.clock.getElapsedTime();
+      const floatingSpeed = 4;
+      const floatingRange = 10;
 
-      let speedFactor = 0.01;
+      meshRef.current.position.y = Math.sin(t * floatingSpeed) * floatingRange;
 
-      if (width < 768) {
-        speedFactor = 0.009;
-      } else if (width < 1024) {
-        speedFactor = 0.09;
-      } else {
-        speedFactor = 0.05;
-      }
-
-      meshRef.current.rotation.x = scrollY * speedFactor;
+      meshRef.current.rotation.z = Math.cos(t * 2.1) * 0.08;
     }
   });
 
@@ -33,6 +24,14 @@ function Scene() {
     <>
       <ambientLight intensity={2} />
       <pointLight position={[100, 100, 100]} intensity={1} />
+      <ContactShadows
+        position={[0, -10, 0]}
+        opacity={1} // 더 진하게
+        scale={1} // 더 넓게
+        blur={1.5} // 더 선명하게
+        far={50}
+        color="#000000"
+      />
       <RoundedBox
         ref={meshRef}
         args={[160, 48, 20]}
@@ -55,7 +54,13 @@ function Scene() {
           roughness={0.3}
           metalness={0.8}
         />
-        <Text position={[0, 0, 11]} fontSize={16} color="white">
+        <Text
+          position={[0, 0, 11]}
+          fontSize={18}
+          color="white"
+          letterSpacing={0.2}
+          font="/font/Pretendard-Bold.woff"
+        >
           시작하기
         </Text>
       </RoundedBox>
@@ -68,19 +73,26 @@ function Scene() {
  */
 export const ThreeButton = () => {
   return (
-    <div className="h-[48px] w-[160px]">
+    <div className="relative mx-auto h-[80px] w-[200px]">
       <Canvas
         orthographic
         camera={{
-          left: -80,
-          right: 80,
-          top: 24,
-          bottom: -24,
+          left: -100,
+          right: 100,
+          top: 40,
+          bottom: -40,
           near: 0.1,
-          far: 100,
+          far: 1000,
           position: [0, 0, 100],
         }}
         gl={{ alpha: true, antialias: true }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+        }}
       >
         <Scene />
       </Canvas>

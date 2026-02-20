@@ -20,14 +20,14 @@ const CalendarPicker = ({
       <button
         type="button"
         onClick={() => setShowCalendar(!showCalendar)}
-        className={`flex h-6 w-6 items-center justify-center rounded-full transition-all ${
+        className={`flex h-7 w-7 items-center justify-center rounded-full transition-all sm:h-8 sm:w-8 ${
           showCalendar
             ? "bg-brand-primary/10"
-            : "bg-[#F1F5F9] hover:bg-[#E2E8F0]"
+            : "bg-background-secondary hover:bg-border-primary"
         }`}
       >
         <CalendarIconSvg
-          className={`h-3.5 w-3.5 transition-colors ${
+          className={`h-3.5 w-3.5 transition-colors sm:h-4 sm:w-4 ${
             showCalendar ? "text-brand-primary" : "text-icon-primary"
           }`}
         />
@@ -35,13 +35,16 @@ const CalendarPicker = ({
 
       {showCalendar && (
         <div className="absolute top-full right-0 z-50 mt-3 shadow-2xl">
-          <CalendarDate
-            selectedDate={selectedDate}
-            onSelectDate={(date: Date) => {
-              onDateSelect(date);
-              setShowCalendar(false);
-            }}
-          />
+          {/* CalendarDate 컴포넌트 내부도 모바일 대응이 되어있다고 가정합니다 */}
+          <div className="origin-top-right scale-90 sm:scale-100">
+            <CalendarDate
+              selectedDate={selectedDate}
+              onSelectDate={(date: Date) => {
+                onDateSelect(date);
+                setShowCalendar(false);
+              }}
+            />
+          </div>
         </div>
       )}
     </div>

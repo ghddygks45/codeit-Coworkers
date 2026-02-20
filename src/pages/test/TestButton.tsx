@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "../../components/common/Button/Button";
 import PlusBlue from "../../assets/plus_blue.svg";
 

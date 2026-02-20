@@ -16,9 +16,7 @@ export const queryClient = new QueryClient({
       onError: (error) => {
         const errorData = getErrorDataByCode(error);
         // zustand store의 getState()로 React 외부에서 접근
-        useToastStore
-          .getState()
-          .show(`[${errorData.code}] ${errorData.message}`);
+        useToastStore.getState().show(errorData.message);
       },
     },
   },

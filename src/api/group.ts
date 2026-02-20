@@ -13,6 +13,84 @@ import {
 import { fetchClient } from "@/lib/fetchClient";
 import { TaskServer } from "@/types/task";
 
+// 그룹 생성
+export async function createGroup(data: {
+  name: string;
+  image?: string;
+}): Promise<GroupServer> {
+  return await fetchClient(`${BASE_URL}/groups`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+// 그룹 생성 훅
+export function useCreateGroup() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createGroup,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["group"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+  });
+}
+
+// 그룹 수정
+export async function updateGroup(
+  id: number,
+  data: {
+    name: string;
+    image?: string;
+  },
+): Promise<GroupServer> {
+  return await fetchClient(`${BASE_URL}/groups/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+// 그룹 수정 훅
+export function useUpdateGroup() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: { name: string; image?: string };
+    }) => updateGroup(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["group"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+    },
+  });
+}
+
+// 그룹 삭제
+export async function deleteGroup(id: number): Promise<void> {
+  return await fetchClient(`${BASE_URL}/groups/${id}`, {
+    method: "DELETE",
+  });
+}
+
+// 그룹 삭제 훅
+export function useDeleteGroup() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => deleteGroup(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["group"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+    },
+  });
+}
+
 // 단일 그룹 조회
 export async function getGroup(id: number): Promise<GroupServer> {
   return await fetchClient(`${BASE_URL}/groups/${id}`, {
@@ -97,5 +175,53 @@ export function useAllTasks(groupId: number, date?: string) {
     queryKey: ["allTasks", groupId, date],
     queryFn: () => getAllTasks(groupId, date),
     staleTime: 1000 * 60 * 5,
+  });
+}
+
+// 초대 링크용 토큰 생성
+export async function getInvitationLink(
+  groupId: number,
+): Promise<{ invitationLink: string }> {
+  return await fetchClient(`${BASE_URL}/groups/${groupId}/invitation`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+// 초대 링크용 토큰 생성 훅
+export function useInvitationLink(groupId: number) {
+  return useSuspenseQuery<{ invitationLink: string }>({
+    queryKey: ["invitationLink", groupId],
+    queryFn: () => getInvitationLink(groupId),
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+// 그룹 초대 수락
+export async function acceptGroupInvitation(
+  userEmail: string,
+  token: string,
+): Promise<{ groupId: number }> {
+  return await fetchClient(`${BASE_URL}/groups/accept-invitation`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userEmail, token }),
+  });
+}
+
+// 그룹 초대 수락 훅
+export function useAcceptGroupInvitation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userEmail, token }: { userEmail: string; token: string }) =>
+      acceptGroupInvitation(userEmail, token),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+    },
   });
 }

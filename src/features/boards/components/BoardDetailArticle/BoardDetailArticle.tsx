@@ -3,7 +3,7 @@ import ProfileIcon from "@/assets/icon.svg";
 import HeartIcon from "@/assets/heart.svg";
 import HeartFillIcon from "@/assets/heart-fill.svg";
 import { formatDate, formatLikeCount } from "@/utils/format";
-import CommentSection from "../CommentSection";
+import CommentSection from "../CommentSection/CommentSection";
 import type { ArticleDetail } from "@/types/article";
 
 interface BoardDetailArticleProps {

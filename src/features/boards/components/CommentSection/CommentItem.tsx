@@ -148,7 +148,7 @@ export default function CommentItem({
             <button
               type="button"
               onClick={() => setIsDeleteModalOpen(false)}
-              className="text-lg-b text-color-default h-[48px] w-[135px] rounded-[12px] border-[1px] border-solid border-[#cbd5e1] text-center"
+              className="text-lg-b text-color-default border-border-secondary h-[48px] w-[135px] rounded-[12px] border-[1px] border-solid text-center"
             >
               닫기
             </button>

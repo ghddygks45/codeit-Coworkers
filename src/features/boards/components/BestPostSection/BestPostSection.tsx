@@ -1,13 +1,13 @@
 import { useBestArticles } from "@/api/article";
 import type { ArticleSummary } from "@/types/article";
 import { formatDate } from "@/utils/format";
-import BestPostCarousel from "../BestPostCarousel";
+import BestPostCarousel from "../BestPostCarousel/BestPostCarousel";
 
 function toBestPost(article: ArticleSummary) {
   return {
     id: article.id,
     title: article.title,
-    content: "",
+    content: article.content ?? "",
     author: article.writer.nickname,
     date: formatDate(article.createdAt),
     likeCount: article.likeCount,

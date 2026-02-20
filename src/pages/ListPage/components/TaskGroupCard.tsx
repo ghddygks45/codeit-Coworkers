@@ -5,6 +5,7 @@ interface TaskGroupCardProps {
   name: string;
   current: number;
   total: number;
+  isActive?: boolean;
   onClick?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -14,6 +15,7 @@ export const TaskGroupCard = ({
   name,
   current,
   total,
+  isActive,
   onClick,
   onEdit,
   onDelete,
@@ -21,7 +23,6 @@ export const TaskGroupCard = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // 메뉴 외부 클릭 시 닫기 로직
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -35,12 +36,20 @@ export const TaskGroupCard = ({
   return (
     <div
       onClick={onClick}
-      className="border-border-primary hover:border-brand-primary group relative flex cursor-pointer items-center justify-between rounded-xl border bg-white p-4 shadow-sm transition-all"
+      className={`group relative flex cursor-pointer items-center justify-between rounded-xl border p-3 shadow-sm transition-all sm:p-4 ${
+        isActive
+          ? "border-brand-primary bg-blue-50"
+          : "border-border-primary hover:border-brand-primary bg-white"
+      }`}
     >
-      <span className="text-lg-m text-color-primary">{name}</span>
+      <span
+        className={`text-md-m sm:text-lg-m truncate pr-2 ${isActive ? "text-brand-primary" : "text-color-primary"}`}
+      >
+        {name}
+      </span>
 
-      <div className="flex items-center gap-3">
-        <span className="text-md-sb text-brand-primary">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <span className="text-sm-sb text-brand-primary sm:text-md-sb">
           {current}/{total}
         </span>
 
@@ -52,18 +61,18 @@ export const TaskGroupCard = ({
             }}
             className="hover:bg-background-secondary rounded-md p-1 transition-colors"
           >
-            <KebabIcon className="text-icon-primary h-4 w-4" />
+            <KebabIcon className="text-icon-primary h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </button>
 
           {isMenuOpen && (
-            <div className="border-border-primary absolute right-0 z-50 mt-2 w-28 overflow-hidden rounded-lg border bg-white shadow-lg">
+            <div className="border-border-primary absolute right-0 z-50 mt-2 w-24 overflow-hidden rounded-lg border bg-white shadow-lg sm:w-28">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit?.();
                   setIsMenuOpen(false);
                 }}
-                className="text-md-m text-color-primary hover:bg-background-secondary w-full px-4 py-2 text-left transition-colors"
+                className="text-sm-m text-color-primary hover:bg-background-secondary sm:text-md-m w-full px-4 py-2 text-left transition-colors"
               >
                 수정하기
               </button>
@@ -73,7 +82,7 @@ export const TaskGroupCard = ({
                   onDelete?.();
                   setIsMenuOpen(false);
                 }}
-                className="text-md-m w-full px-4 py-2 text-left text-red-500 transition-colors hover:bg-red-50"
+                className="text-sm-m sm:text-md-m w-full px-4 py-2 text-left text-red-500 transition-colors hover:bg-red-50"
               >
                 삭제하기
               </button>

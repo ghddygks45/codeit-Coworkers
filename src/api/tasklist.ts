@@ -111,3 +111,35 @@ export function useDeleteTaskList(groupId: number) {
     },
   });
 }
+
+// TaskList 순서 변경
+export async function orderTaskList(
+  groupId: number,
+  taskListId: number,
+  displayIndex: number,
+): Promise<void> {
+  return await fetchClient(
+    `${BASE_URL}/groups/${groupId}/task-lists/${taskListId}/order`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ displayIndex }),
+    },
+  );
+}
+
+// react-query를 활용한 taskList 순서 변경 훅
+// onSuccess invalidation 없음 → handleDrop에서 await 후 다른 mutation이 refetch 담당
+export function useOrderTaskList(groupId: number) {
+  return useMutation({
+    mutationFn: ({
+      taskListId,
+      displayIndex,
+    }: {
+      taskListId: number;
+      displayIndex: number;
+    }) => orderTaskList(groupId, taskListId, displayIndex),
+  });
+}

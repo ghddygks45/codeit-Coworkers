@@ -6,7 +6,6 @@
 // import LogoutModal from "@/components/common/Modal/Contents/LogoutModal";
 import TaskCreateModal from "@/components/common/Modal/Contents/TaskCreateModal";
 import Modal from "@/components/common/Modal/Modal";
-import ModalButton from "@/components/common/Modal/ModalButton";
 import { useState } from "react";
 
 /**
@@ -47,7 +46,13 @@ export default function TestModal() {
       <h1 className="mb-4">Modal Test Page</h1>
 
       {/* 모달을 여는 테스트 버튼 */}
-      <ModalButton buttonText="모달 열기" onClick={handleModalOpen} />
+      <button
+        type="button"
+        onClick={handleModalOpen}
+        className="bg-brand-primary text-lg-b text-color-inverse h-[48px] w-[332px] rounded-[12px] text-center"
+      >
+        모달 열기
+      </button>
 
       {/* 초대 모달 테스트 */}
       {/* <Modal isOpen={isOpen} onClose={handleModalClose}>

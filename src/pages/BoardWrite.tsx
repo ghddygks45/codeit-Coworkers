@@ -3,9 +3,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { FetchBoundary } from "@/providers/boundary";
 import { useArticle, useCreateArticle, useUpdateArticle } from "@/api/article";
-import TitleInput from "@/features/boards/components/TitleInput";
-import ContentInput from "@/features/boards/components/ContentInput";
-import ImageUpload from "@/features/boards/components/ImageUpload";
+import TitleInput from "@/features/Boards/components/TitleInput/TitleInput";
+import ContentInput from "@/features/Boards/components/ContentInput/ContentInput";
+import ImageUpload from "@/features/Boards/components/ImageUpload/ImageUpload";
 
 /**
  * 게시글 쓰기/수정 페이지

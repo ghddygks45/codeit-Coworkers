@@ -14,6 +14,8 @@ import TestTodayProgressSection from "@/pages/test/TestTodayProgressSection";
 import TestErrorBoundary from "@/pages/test/TestErrorBoundary";
 import TestTeamMemberSection from "@/pages/test/TestTeamMemberSection";
 import TestTaskColumn from "@/pages/test/TestTaskColumn";
+import TaskListDetail from "@/features/Tasks/components/TaskListDetail";
+import Spinner from "@/components/common/Spinner/Spinner";
 
 export const testRoutes = [
   {
@@ -61,6 +63,10 @@ export const testRoutes = [
     element: <TestListPage />,
   },
   {
+    path: "/test/loading",
+    element: <Spinner message="로딩 중..." />,
+  },
+  {
     path: "/test/modal",
     element: <TestModal />,
   },
@@ -79,5 +85,9 @@ export const testRoutes = [
   {
     path: "/test/task-column",
     element: <TestTaskColumn />,
+  },
+  {
+    path: "/test/:groupId/:taskListId/:taskId",
+    element: <TaskListDetail />,
   },
 ];

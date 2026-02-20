@@ -1,16 +1,23 @@
+import { useInvitationLink } from "@/api/group";
 import Close from "@/assets/close.svg";
 import { useToastStore } from "@/stores/useToastStore";
+import { useParams } from "react-router-dom";
+import { useState } from "react";
 
 type InviteModalProps = {
   onClose: () => void;
 };
 
 export default function InviteModal({ onClose }: InviteModalProps) {
+  const { id: groupId } = useParams();
+  const { data: invitationLinkData } = useInvitationLink(Number(groupId));
   const { show: showToast } = useToastStore();
+  const [showLink, setShowLink] = useState(false);
 
   const linkCopyHandler = () => {
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText(String(invitationLinkData));
     showToast("링크가 복사되었습니다!");
+    setShowLink(true);
   };
 
   return (
@@ -31,11 +38,20 @@ export default function InviteModal({ onClose }: InviteModalProps) {
           className="bg-brand-primary text-lg-b text-color-inverse h-[48px] w-[280px] rounded-[12px] text-center"
           onClick={() => {
             linkCopyHandler();
-            onClose();
           }}
         >
           링크 복사하기
         </button>
+        {showLink && (
+          <div className="mt-6 flex flex-col">
+            <div className="text-md-m text-color-disabled md:text-color-primary">
+              아래 링크를 복사해 주세요.
+            </div>
+            <p className="md:text-color-primary text-color-disabled text-md-m mt-3 break-all">
+              {String(invitationLinkData)}
+            </p>
+          </div>
+        )}
       </div>
     </>
   );

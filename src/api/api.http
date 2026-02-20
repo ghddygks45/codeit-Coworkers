@@ -97,12 +97,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mjc1MCwidGVhb
 ### 할 일 항목 생성
 POST https://fe-project-cowokers.vercel.app/20-3/groups/3810/task-lists/5295/tasks
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mjc1MCwidGVhbUlkIjoiMjAtMyIsInNjb3BlIjoiYWNjZXNzIiwiaWF0IjoxNzcwNTQxMDQ5LCJleHAiOjE3NzA1NDQ2NDksImlzcyI6InNwLWNvd29ya2VycyJ9.k87lNf8VVWqyniMpOY6gEZQunVx-ds0BxUR9HBsNCjk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mjc1MCwidGVhbUlkIjoiMjAtMyIsInNjb3BlIjoiYWNjZXNzIiwiaWF0IjoxNzcxNDg2MTkyLCJleHAiOjE3NzE0ODk3OTIsImlzcyI6InNwLWNvd29ya2VycyJ9.zacfKF-KB5lmf0teQck_9bj_S-w7E6JsHd6zCfv9GZw
 
 {
-  "name": "드롭다운 기능 구현",
-  "description": "드롭다운 기능 구현",
-  "startDate": "2026-02-08T00:00:00Z",
+  "name": "드래그앤드랍 기능 구현",
+  "description": "드래그앤드랍 기능 구현",
+  "startDate": "2026-02-19T00:00:00Z",
   "frequencyType": "ONCE"
 }
 

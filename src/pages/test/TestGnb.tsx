@@ -1,4 +1,4 @@
-import Gnb from "@/components/gnb/Gnb";
+import Gnb from "@/components/layout/Gnb/Gnb";
 
 export default function TestGnb() {
   return (

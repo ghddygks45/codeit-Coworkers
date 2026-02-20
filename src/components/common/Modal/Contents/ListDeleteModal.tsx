@@ -39,7 +39,7 @@ export default function ListDeleteModal({
         <div className="mt-7 flex flex-row justify-center gap-2">
           <button
             onClick={onClose}
-            className="text-lg-b text-color-default h-[48px] w-[135px] rounded-[12px] border-[1px] border-solid border-[#cbd5e1] text-center"
+            className="text-lg-b text-color-default border-border-secondary h-[48px] w-[135px] rounded-[12px] border-[1px] border-solid text-center"
           >
             닫기
           </button>

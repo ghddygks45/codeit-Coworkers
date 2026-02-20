@@ -1,8 +1,8 @@
 import { RefObject } from "react";
-import BoardListSectionHeader from "../BoardListSectionHeader";
-import BoardListSkeleton from "../BoardListSkeleton";
-import BoardListEmpty from "../BoardListEmpty";
-import BoardListGrid from "../BoardListGrid";
+import BoardListSectionHeader from "../BoardListSectionHeader/BoardListSectionHeader";
+import BoardListSkeleton from "../BoardListSkeleton/BoardListSkeleton";
+import BoardListEmpty from "../BoardListEmpty/BoardListEmpty";
+import BoardListGrid from "../BoardListGrid/BoardListGrid";
 import Pagination from "@/components/common/Pagination/Pagination";
 import type { ArticleSummary } from "@/types/article";
 

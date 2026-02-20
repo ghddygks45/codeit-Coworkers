@@ -16,6 +16,7 @@ export interface ArticleSummary {
   likeCount: number;
   writer: ArticleWriter;
   image: string | null;
+  content?: string;
   title: string;
   id: number;
 }

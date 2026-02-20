@@ -15,8 +15,11 @@ export default function ForgotPasswordModal({
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
-  } = useForm<{ email: string }>();
+  } = useForm<{ email: string }>({
+    mode: "onChange",
+  });
 
   if (!isOpen) return null;
 
@@ -30,6 +33,7 @@ export default function ForgotPasswordModal({
       });
 
       alert("비밀번호 재설정 이메일이 전송되었습니다. 메일함을 확인해주세요.");
+      reset();
       onClose();
     } catch (error) {
       let message = "이메일 전송에 실패했습니다.";
@@ -56,23 +60,26 @@ export default function ForgotPasswordModal({
           비밀번호 재설정 링크를 보내드립니다.
         </p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1">
             <Input
               {...register("email", {
                 required: "이메일을 입력해주세요.",
                 pattern: {
-                  value: /\S+@\S+\.\S+/,
+                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
                   message: "이메일 형식에 맞지 않습니다.",
                 },
               })}
               placeholder="이메일을 입력하세요"
+              className={errors.email ? "border-status-danger" : ""}
             />
-            {errors.email && (
-              <p className="text-status-danger text-xs">
-                {errors.email.message}
-              </p>
-            )}
+            <div className="h-4">
+              {errors.email && (
+                <p className="text-status-danger text-xs">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="flex gap-3">
@@ -80,7 +87,11 @@ export default function ForgotPasswordModal({
               type="button"
               variant="close"
               className="flex-1"
-              onClick={onClose}
+              onClick={(e) => {
+                e.preventDefault();
+                reset();
+                onClose();
+              }}
               disabled={isSubmitting}
             >
               닫기

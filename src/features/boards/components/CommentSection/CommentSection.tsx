@@ -6,7 +6,7 @@ import {
   useCreateArticleComment,
 } from "@/api/articleComment";
 import ProfileIcon from "@/assets/icon.svg";
-import EnterIcon from "@/features/boards/assets/enter.svg";
+import EnterIcon from "@/features/Boards/assets/enter.svg";
 import CommentItem from "./CommentItem";
 
 interface CommentSectionProps {

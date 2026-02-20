@@ -25,8 +25,8 @@ export default function CarouselDots({
           aria-label={`${index + 1}페이지로 이동`}
           className={`transition-all ${
             index === current
-              ? "h-2 w-4 rounded-[80px] bg-[#94A3B8]"
-              : "h-2 w-2 rounded-full bg-[#CBD5E1]"
+              ? "bg-interaction-inactive h-2 w-4 rounded-[80px]"
+              : "bg-border-secondary h-2 w-2 rounded-full"
           }`}
         />
       ))}

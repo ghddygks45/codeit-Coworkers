@@ -1,9 +1,9 @@
-import TeamMemberSection from "@/features/TeamMemberSectiom/TeamMemberSection";
+import TeamMemberSection from "@/features/Team/TeamMemberSection/TeamMemberSection";
 
 export default function TestTeamMemberSection() {
   return (
     <>
-      <TeamMemberSection />
+      <TeamMemberSection groupId={3810} />
     </>
   );
 }

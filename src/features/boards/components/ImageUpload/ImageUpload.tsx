@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useIsMobile } from "@/hooks/useMediaQuery";
-import { uploadImage } from "@/api/image";
+import { useUploadImage } from "@/api/image";
+import { useToastStore } from "@/stores/useToastStore";
 import ImageIcon from "@/assets/image-icon.svg";
 import CloseIcon from "@/assets/close.svg";
 
@@ -26,7 +27,8 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const { mutate, isPending } = useUploadImage();
+  const toast = useToastStore();
 
   const imageCount = imageUrl ? 1 : 0;
 
@@ -41,29 +43,26 @@ export default function ImageUpload({
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // 10MB 제한 확인
     if (file.size > 10 * 1024 * 1024) {
-      alert("이미지 파일은 최대 10MB까지 업로드 가능합니다.");
+      toast.show("이미지 파일은 최대 10MB까지 업로드 가능합니다.");
       return;
     }
 
-    try {
-      setIsUploading(true);
-      const url = await uploadImage(file);
-      onImageChange?.(url);
-    } catch {
-      alert("이미지 업로드에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setIsUploading(false);
-      // input 초기화 (같은 파일 재선택 가능하도록)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
+    mutate(file, {
+      onSuccess: (url) => onImageChange?.(url),
+      onError: () =>
+        toast.show("이미지 업로드에 실패했습니다. 다시 시도해주세요."),
+      onSettled: () => {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      },
+    });
   };
 
   const handleRemove = () => {
@@ -83,11 +82,11 @@ export default function ImageUpload({
         {!imageUrl && (
           <button
             type="button"
-            disabled={isUploading}
+            disabled={isPending}
             className={`border-border-primary rounded-xl border ${imageBoxSize} flex flex-col items-center justify-center ${iconTextGap} bg-background-primary hover:bg-background-secondary transition-colors disabled:opacity-50`}
             onClick={handleClick}
           >
-            {isUploading ? (
+            {isPending ? (
               <span className="text-color-default text-xs">업로드 중...</span>
             ) : (
               <>

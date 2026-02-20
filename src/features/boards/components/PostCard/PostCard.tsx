@@ -190,7 +190,7 @@ export default function PostCard({
   // Default 카드 레이아웃
   return (
     <article
-      className={`bg-background-inverse flex flex-col rounded-[20px] ${widthClass} ${contentAuthorGap}`}
+      className={`bg-background-inverse border-border-primary flex flex-col rounded-[20px] border ${widthClass} ${contentAuthorGap}`}
     >
       {/* 제목 + 본문 + 이미지 */}
       <div className="flex flex-1 items-start gap-2">

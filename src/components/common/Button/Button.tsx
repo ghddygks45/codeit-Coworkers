@@ -14,7 +14,7 @@ const fontClassMap: Record<string, string> = {
  * @property {string} fontSize - fontClassMap에 정의된 키값
  * @property {number} radius - 테두리 둥글기 (px)
  */
-export const buttonSizeMap = {
+const buttonSizeMap = {
   landing: { width: 160, height: 48, fontSize: "lg-m", radius: 12 },
   authWide: { width: "100%", height: 48, fontSize: "lg-m", radius: 12 },
   teamMedium: { width: 186, height: 48, fontSize: "lg-m", radius: 12 },
@@ -42,7 +42,7 @@ const variantClassMap: Record<ButtonVariant, string> = {
     border
     border-brand-primary
     text-brand-primary
-    bg-surface-primary
+    bg-background-primary
     hover:bg-brand-primary/10
   `,
   danger: `
@@ -54,7 +54,7 @@ const variantClassMap: Record<ButtonVariant, string> = {
     border
     border-color-secondary
     text-color-default
-    bg-surface-primary
+    bg-background-primary
     hover:bg-background-secondary
     active:bg-background-tertiary
   `,

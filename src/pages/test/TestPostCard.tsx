@@ -1,4 +1,4 @@
-import PostCard from "../../features/boards/components/PostCard";
+import PostCard from "../../features/Boards/components/PostCard/PostCard";
 
 const sampleData = {
   title: "커피 머신 고장 신고합니다 ☕🧨",

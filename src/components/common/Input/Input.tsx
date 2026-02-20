@@ -1,5 +1,3 @@
-"use client";
-
 import {
   useState,
   ReactNode,
@@ -12,7 +10,7 @@ import PasswordVisibilityFalse from "../../../assets/password-visibility-false.s
 import PasswordVisibilityTrue from "../../../assets/password-visibility-true.svg";
 
 /* 1. Input Size Map */
-export const inputSizeMap = {
+const inputSizeMap = {
   auth: { base: { height: 44 } },
   authWide: { base: { height: 44 } },
   search: { base: { height: 48 } },
@@ -28,12 +26,12 @@ type InputVariant = "default" | "search";
 const inputVariantClassMap: Record<InputVariant, string> = {
   default: `
     border-border-primary
-    bg-surface-secondary
+    bg-background-secondary
     text-color-primary
   `,
   search: `
     border-brand-primary
-    bg-surface-primary
+    bg-background-primary
   `,
 };
 

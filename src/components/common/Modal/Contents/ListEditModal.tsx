@@ -21,6 +21,13 @@ export default function ListEditModal({
 
   const { show: showToast } = useToastStore();
 
+  const handleNameChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const isDoing = name.includes("{status:doing}");
+    setName(isDoing ? `${e.target.value}{status:doing}` : e.target.value);
+  };
+
   const handleEdit = (taskListId: number) => {
     updateList({ taskListId, newName: name });
     showToast("목록이 수정되었습니다.");
@@ -41,8 +48,8 @@ export default function ListEditModal({
             <Input
               placeholder="목록 명을 입력해주세요."
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={name.replace("{status:doing}", "").trim()}
+              onChange={handleNameChange}
             />
           </div>
         </div>

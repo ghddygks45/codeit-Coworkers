@@ -1,6 +1,7 @@
 import React from "react";
 import CheckedIcon from "@/assets/checkbox-active.svg";
 import UncheckedIcon from "@/assets/checkbox.svg";
+import { cn } from "@/utils/clsx";
 
 /**
  * @interface TodoProps
@@ -15,13 +16,22 @@ interface TodoProps {
   isCompleted: boolean;
   onToggle?: () => void;
   isWeb?: boolean;
+  className?: string;
+  iconClassName?: string;
 }
 
 /**
  * Coworkers 프로젝트의 웹 접근성(A11y)을 고려한 공통 Todo 아이템 컴포넌트입니다.
  * 실제 체크박스(input)를 숨기고 커스텀 SVG 아이콘을 라벨로 연결하여 구현되었습니다.
  */
-const Todo = ({ content, isCompleted, onToggle, isWeb }: TodoProps) => {
+const Todo = ({
+  content,
+  isCompleted,
+  onToggle,
+  isWeb,
+  className,
+  iconClassName,
+}: TodoProps) => {
   const isWebForced = isWeb !== undefined;
 
   const containerStyle = isWebForced
@@ -44,7 +54,10 @@ const Todo = ({ content, isCompleted, onToggle, isWeb }: TodoProps) => {
 
   return (
     <label
-      className={`group flex w-full cursor-pointer items-center transition-all ${containerStyle}`}
+      className={cn(
+        `group flex w-full ${onToggle ? "cursor-pointer" : "cursor-default"} items-center transition-all ${containerStyle}`,
+        className,
+      )}
     >
       {/* 실제 체크박스 요소를 사용하여 접근성을 확보합니다. */}
       <input
@@ -57,7 +70,10 @@ const Todo = ({ content, isCompleted, onToggle, isWeb }: TodoProps) => {
 
       {/* 체크 상태에 따른 커스텀 아이콘 렌더링 영역 */}
       <div
-        className={`flex shrink-0 items-center justify-center transition-transform active:scale-95 ${iconSize}`}
+        className={cn(
+          `flex shrink-0 items-center justify-center transition-transform active:scale-95 ${iconSize}`,
+          iconClassName,
+        )}
       >
         {isCompleted ? (
           <CheckedIcon className="h-full w-full" />

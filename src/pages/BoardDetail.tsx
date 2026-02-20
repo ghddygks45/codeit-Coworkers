@@ -4,10 +4,10 @@ import { useIsMobile } from "@/hooks/useMediaQuery";
 import { FetchBoundary } from "@/providers/boundary";
 import { useArticle, useDeleteArticle, useToggleLike } from "@/api/article";
 import { useUser } from "@/api/user";
-import BoardDetailSkeleton from "@/features/boards/components/BoardDetailSkeleton";
-import BoardDetailArticle from "@/features/boards/components/BoardDetailArticle";
-import BoardDetailFloatingLike from "@/features/boards/components/BoardDetailFloatingLike";
-import ArticleDeleteModal from "@/features/boards/components/ArticleDeleteModal";
+import BoardDetailSkeleton from "@/features/Boards/components/BoardDetailSkeleton/BoardDetailSkeleton";
+import BoardDetailArticle from "@/features/Boards/components/BoardDetailArticle/BoardDetailArticle";
+import BoardDetailFloatingLike from "@/features/Boards/components/BoardDetailFloatingLike/BoardDetailFloatingLike";
+import ArticleDeleteModal from "@/features/Boards/components/ArticleDeleteModal/ArticleDeleteModal";
 
 /**
  * 게시글 상세 페이지

@@ -14,7 +14,7 @@ export default function PasswordUpdateModal({
           <input
             id="newPassword"
             type="text"
-            className="placeholder-color-default h-[48px] w-[280px] rounded-[12px] border-[1px] border-solid border-[#e2e8f0] p-4"
+            className="placeholder-color-default border-border-primary h-[48px] w-[280px] rounded-[12px] border-[1px] border-solid p-4"
             placeholder="새 비밀번호를 입력해주세요."
           />
         </div>
@@ -23,7 +23,7 @@ export default function PasswordUpdateModal({
           <input
             id="newPassword"
             type="text"
-            className="placeholder-color-default mb-6 h-[48px] w-[280px] rounded-[12px] border-[1px] border-solid border-[#e2e8f0] p-4"
+            className="placeholder-color-default border-border-primary mb-6 h-[48px] w-[280px] rounded-[12px] border-[1px] border-solid p-4"
             placeholder="새 비밀번호를 다시 한 번 입력해주세요."
           />
         </div>

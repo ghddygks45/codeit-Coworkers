@@ -49,6 +49,7 @@ module.exports = {
         "color-inverse": "#FFFFFF",
         "color-disabled": "#94A3B8",
         "border-primary": "#E2E8F0",
+        "border-secondary": "#CBD5E1",
 
         /* Status */
         status: {

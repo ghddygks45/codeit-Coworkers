@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import PostCard from "../PostCard";
+import PostCard from "../PostCard/PostCard";
 import type { ArticleSummary } from "@/types/article";
 import { formatDate } from "@/utils/format";
 
@@ -27,7 +27,7 @@ export default function BoardListGrid({
             state="default"
             size={cardSize}
             title={article.title}
-            content=""
+            content={article.content ?? ""}
             author={article.writer.nickname}
             date={formatDate(article.createdAt)}
             likeCount={article.likeCount}

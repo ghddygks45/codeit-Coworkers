@@ -15,7 +15,7 @@ export default function PasswordResetModal({
       </div>
       <input
         type="text"
-        className="placeholder-color-default mt-2 mb-6 h-[48px] w-full rounded-[12px] border-[1px] border-solid border-[#e2e8f0] p-4"
+        className="placeholder-color-default border-border-primary mt-2 mb-6 h-[48px] w-full rounded-[12px] border-[1px] border-solid p-4"
         placeholder="이메일을 입력하세요."
       />
       <div className="flex flex-row justify-center gap-2">

@@ -1,4 +1,4 @@
-import Badge from "../../components/common/Badge";
+import Badge from "../../components/common/Badge/Badge";
 
 export default function TestBadge() {
   return (
