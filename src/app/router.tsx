@@ -11,7 +11,7 @@ import LoginPage from "@/pages/Login";
 import ResetPasswordPage from "@/pages/ResetPassword";
 import RootLayout from "@/components/layout/RootLayout";
 import KakaoRedirectPage from "@/pages/KakaoRedirectPage";
-import Team from "@/pages/team";
+import Team from "@/pages/Team";
 import MyHistory from "@/pages/MyHistory";
 import JoinTeam from "@/pages/JoinTeam";
 import AddTeam from "@/pages/AddTeam";

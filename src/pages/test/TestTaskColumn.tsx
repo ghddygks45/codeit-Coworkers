@@ -1,4 +1,4 @@
-import TaskColumn from "@/features/Team/taskcolumn/TaskColumn";
+import TaskColumn from "@/features/Team/TaskColumn/TaskColumn";
 
 export default function TestTaskColumn() {
   return (
