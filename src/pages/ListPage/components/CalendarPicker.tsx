@@ -36,7 +36,7 @@ const CalendarPicker = ({
       {showCalendar && (
         <div className="absolute top-full right-0 z-50 mt-3 shadow-2xl">
           {/* CalendarDate 컴포넌트 내부도 모바일 대응이 되어있다고 가정합니다 */}
-          <div className="origin-top-right scale-90 sm:scale-100">
+          <div className="origin-top-right">
             <CalendarDate
               selectedDate={selectedDate}
               onSelectDate={(date: Date) => {

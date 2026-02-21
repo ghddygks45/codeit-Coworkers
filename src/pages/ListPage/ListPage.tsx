@@ -1,6 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useParams, useNavigate, Outlet } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Outlet, useNavigate, useParams } from "react-router-dom";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useQueries,
+} from "@tanstack/react-query";
 
 import { fetchClient, HttpError } from "@/lib/fetchClient";
 import { BASE_URL } from "@/api/config";
@@ -99,29 +104,31 @@ export default function ListPage() {
     null,
   );
 
-  // ✅ 삭제 선택 모달 상태
+  // 삭제 선택 모달 상태
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<UITask | null>(null);
 
+  // 그룹 설정 드롭다운
+  const [isTeamMenuOpen, setIsTeamMenuOpen] = useState(false);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
+  const teamMenuRef = useRef<HTMLDivElement>(null);
 
-  // 1. 유저 팀 목록 정보
+  // 유저 팀 목록 정보
   const { data: groups = [] } = useGroups();
   const currentTeam = groups.find(
     (group: GroupSummaryServer) => group.id === selectedTeamId,
   );
 
-  // 2. 그룹 할 일 목록 조회
+  // 그룹 할 일 목록 조회
   const { data: taskGroups = [], isLoading: isListLoading } = useQuery({
     queryKey: ["taskLists", selectedTeamId],
     queryFn: async () => {
       try {
         const data = await fetchClient<GroupDetailResponse>(
           `${BASE_URL}/groups/${selectedTeamId}`,
-          {
-            method: "GET",
-          },
+          { method: "GET" },
         );
         return data.taskLists ?? [];
       } catch (error: unknown) {
@@ -132,7 +139,7 @@ export default function ListPage() {
     enabled: !!selectedTeamId && !isNaN(selectedTeamId),
   });
 
-  // 3. 현재 활성화된 리스트 ID 계산
+  // 현재 활성화된 리스트 ID 계산
   const currentListId =
     userSelectedListId ??
     (urlListId && urlListId > 0 ? urlListId : null) ??
@@ -140,7 +147,7 @@ export default function ListPage() {
 
   const dateParam = `${formatDateToYYYYMMDD(selectedDate)}T00:00:00Z`;
 
-  // 4. 할 일 리스트 조회
+  // 할 일 리스트 조회(현재 선택 리스트)
   const { data: tasks = [], isLoading: isTasksLoading } = useQuery({
     queryKey: ["tasks", currentListId, dateParam],
     queryFn: () => getTasks(selectedTeamId, currentListId!, dateParam),
@@ -153,6 +160,46 @@ export default function ListPage() {
       })),
     staleTime: 1000 * 60,
   });
+
+  // ✅ (요구사항 2) 데스크탑에서 0/0이 “클릭해야 바뀌는 문제” 해결:
+  // 각 리스트별로 현재 날짜(dateParam)의 tasks를 미리 조회해서 count를 만든다.
+  const listCountQueries = useQueries({
+    queries: (taskGroups ?? []).map((g) => ({
+      queryKey: ["tasks", g.id, dateParam],
+      queryFn: () => getTasks(selectedTeamId, g.id, dateParam),
+      enabled: !!selectedTeamId && !!g.id,
+      staleTime: 1000 * 60,
+      select: (data: TaskServer[]) => {
+        const total = data.length;
+        const current = data.filter((t) => !!t.doneAt).length;
+        const isAllDone = total > 0 && current === total;
+        return { total, current, isAllDone };
+      },
+    })),
+  });
+
+  const countsByListId = useMemo(() => {
+    const map: Record<
+      number,
+      { total: number; current: number; isAllDone: boolean } | null
+    > = {};
+    (taskGroups ?? []).forEach((g, idx) => {
+      map[g.id] = listCountQueries[idx]?.data ?? null;
+    });
+    return map;
+  }, [taskGroups, listCountQueries]);
+
+  // ✅ 0/0 “눌러야 반영” 느낌 방지: 로딩 중엔 —/— 표시 (현재 선택 리스트용)
+  const currentCount = isTasksLoading
+    ? null
+    : tasks.filter((t) => t.isCompleted).length;
+  const totalCount = isTasksLoading ? null : tasks.length;
+
+  const isAllDone =
+    currentCount !== null &&
+    totalCount !== null &&
+    totalCount > 0 &&
+    currentCount === totalCount;
 
   // --- Mutations ---
   const createTaskMutation = useMutation({
@@ -169,13 +216,7 @@ export default function ListPage() {
       showToast("할 일이 추가되었습니다.");
       setIsTaskModalOpen(false);
     },
-    onError: (error) => {
-      if (error instanceof HttpError) {
-        console.error("🔥 status:", error.status);
-        console.error("🔥 server message:", error.data);
-      } else {
-        console.error("🔥 unknown error:", error);
-      }
+    onError: () => {
       showToast("할 일 추가에 실패했습니다.");
     },
   });
@@ -193,7 +234,7 @@ export default function ListPage() {
     },
   });
 
-  // ✅ 단일 할 일 삭제 (dateParam 포함 invalidate)
+  // 단일 할 일 삭제 (dateParam 포함 invalidate)
   const deleteTaskMutation = useMutation({
     mutationFn: (id: number) => deleteTask(selectedTeamId, currentListId!, id),
     onSuccess: () => {
@@ -205,8 +246,7 @@ export default function ListPage() {
       });
       showToast("할 일이 삭제되었습니다.");
     },
-    onError: (e) => {
-      console.error(e);
+    onError: () => {
       showToast("할 일 삭제에 실패했습니다.");
     },
   });
@@ -236,18 +276,34 @@ export default function ListPage() {
       });
       showToast("반복 할 일이 전체 삭제되었습니다.");
     },
-    onError: (e) => {
-      console.error(e);
+    onError: () => {
       showToast("반복 할 일 삭제에 실패했습니다.");
     },
   });
 
   const { mutate: deleteList } = useDeleteTaskList(selectedTeamId);
 
+  // ✅ 그룹 삭제
+  const deleteGroupMutation = useMutation({
+    mutationFn: async () => {
+      await fetchClient<void>(`${BASE_URL}/groups/${selectedTeamId}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      showToast("그룹이 삭제되었습니다.");
+      navigate("/");
+    },
+    onError: () => {
+      showToast("그룹 삭제에 실패했습니다.");
+    },
+  });
+
   // --- Handlers ---
   const handleSelectList = (id: number) => {
     setUserSelectedListId(id);
-    navigate(String(id));
+    navigate(`/team/${teamId}/tasklists/${id}`);
   };
 
   const handleCreateTask = (data: TaskData) => {
@@ -259,7 +315,6 @@ export default function ListPage() {
 
     let payload: CreateTaskParams;
 
-    // ✅ "한 번" / "반복 안함" → ONCE 명시
     if (
       !data.isRecurring ||
       data.repeatLabel === "한 번" ||
@@ -285,11 +340,10 @@ export default function ListPage() {
         return;
       }
 
-      // 선택한 요일들을 서버가 요구하는 숫자 배열로 변환
       const weekDays = selected
         .map((day) => KOREAN_WEEKDAY_TO_JS[day])
         .filter((v): v is number => v !== undefined)
-        .map((v) => v + 1); // ✅ 1~7
+        .map((v) => v + 1); // 1~7
 
       if (weekDays.length === 0) {
         alert("요일 값이 올바르지 않습니다.");
@@ -301,7 +355,7 @@ export default function ListPage() {
         description,
         startDate,
         frequencyType: "WEEKLY",
-        weekDays, // ✅ weekDays 배열로 전송
+        weekDays,
       } as CreateTaskParams;
     } else if (data.repeatLabel === "월 반복") {
       const d = new Date(startDate);
@@ -323,8 +377,6 @@ export default function ListPage() {
       } as CreateTaskParams;
     }
 
-    console.log("✅ createTask payload:", payload);
-
     createTaskMutation.mutate({
       taskListId: currentListId,
       body: payload,
@@ -338,7 +390,7 @@ export default function ListPage() {
     }
   };
 
-  // ✅ 삭제 선택 모달 열기/닫기
+  // 삭제 선택 모달 열기/닫기
   const openDeleteModal = (task: UITask) => {
     setDeleteTarget(task);
     setIsDeleteModalOpen(true);
@@ -349,14 +401,12 @@ export default function ListPage() {
     setDeleteTarget(null);
   };
 
-  // ✅ 모달에서 "이번 일정만 삭제"
   const handleDeleteOnlyThis = () => {
     if (!deleteTarget) return;
     deleteTaskMutation.mutate(deleteTarget.id);
     closeDeleteModal();
   };
 
-  // ✅ 모달에서 "반복 전체 삭제"
   const handleDeleteAllRecurring = () => {
     if (!deleteTarget) return;
 
@@ -367,14 +417,19 @@ export default function ListPage() {
     closeDeleteModal();
   };
 
+  // 바깥 클릭 닫기 (드롭다운/캘린더/그룹메뉴)
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
+
       if (dropdownRef.current && !dropdownRef.current.contains(target))
         setIsDropdownOpen(false);
       if (calendarRef.current && !calendarRef.current.contains(target))
         setShowCalendar(false);
+      if (teamMenuRef.current && !teamMenuRef.current.contains(target))
+        setIsTeamMenuOpen(false);
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -387,9 +442,21 @@ export default function ListPage() {
     tasks: [],
   };
 
+  // ✅ (요구사항 1 보조) 패널이 닫힐 때도 한 번 더 안전하게 갱신
+  useEffect(() => {
+    if (!isOpen && currentListId) {
+      queryClient.invalidateQueries({
+        queryKey: ["tasks", currentListId, dateParam],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["taskLists", selectedTeamId],
+      });
+    }
+  }, [isOpen, currentListId, dateParam, selectedTeamId, queryClient]);
+
+  // 모바일에서 상세패널 열렸을 때 배경 스크롤 방지
   useEffect(() => {
     const isMobileOrTablet = window.matchMedia("(max-width: 1023px)").matches;
-
     if (!isOpen || !isMobileOrTablet) return;
 
     const scrollY = window.scrollY;
@@ -408,13 +475,9 @@ export default function ListPage() {
       document.body.style.position = originalPosition;
       document.body.style.top = originalTop;
       document.body.style.width = originalWidth;
-
       window.scrollTo(0, scrollY);
     };
   }, [isOpen]);
-
-  const currentCount = tasks.filter((t) => t.isCompleted).length;
-  const totalCount = tasks.length;
 
   return (
     <div className="bg-background-secondary font-pretendard flex min-h-screen flex-col lg:flex-row">
@@ -430,7 +493,47 @@ export default function ListPage() {
             <h1 className="md:text-2xl-b text-xl font-bold">
               {currentTeam ? currentTeam.name : "할 일 목록"}
             </h1>
-            <SettingsIcon className="text-icon-primary ml-2.5 h-5 w-5 cursor-pointer" />
+
+            {/* ✅ 그룹 설정 드롭다운 */}
+            <div className="relative" ref={teamMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsTeamMenuOpen((v) => !v)}
+                className="active:scale-95"
+                aria-label="그룹 설정"
+              >
+                <SettingsIcon className="text-icon-primary ml-2.5 h-5 w-5 cursor-pointer" />
+              </button>
+
+              {isTeamMenuOpen && (
+                <div className="border-border-primary absolute top-8 right-0 z-80 w-44 overflow-hidden rounded-xl border bg-white shadow-xl">
+                  <button
+                    type="button"
+                    className="text-color-primary hover:bg-background-secondary w-full px-4 py-3 text-left text-sm"
+                    onClick={() => {
+                      setIsTeamMenuOpen(false);
+                      navigate(`/team/${teamId}/edit`);
+                    }}
+                  >
+                    그룹 수정하기
+                  </button>
+
+                  <button
+                    type="button"
+                    className="hover:bg-background-secondary w-full px-4 py-3 text-left text-sm text-red-500 disabled:opacity-50"
+                    onClick={() => {
+                      setIsTeamMenuOpen(false);
+                      if (confirm("정말 이 그룹을 삭제하시겠습니까?")) {
+                        deleteGroupMutation.mutate();
+                      }
+                    }}
+                    disabled={deleteGroupMutation.isPending}
+                  >
+                    그룹 삭제하기
+                  </button>
+                </div>
+              )}
+            </div>
           </header>
 
           <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
@@ -442,32 +545,42 @@ export default function ListPage() {
 
                 {/* 모바일 뷰 드롭다운 */}
                 <div className="flex items-center justify-between gap-2 lg:hidden">
-                  <div className="relative max-w-50 flex-1" ref={dropdownRef}>
+                  <div className="relative min-w-0 flex-1" ref={dropdownRef}>
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       className="border-border-primary flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 shadow-sm active:scale-95"
                     >
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="text-color-primary text-sm-sb">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="text-color-primary text-sm-sb wrap-break-word whitespace-normal">
                           {activeGroup.name}
                         </span>
-                        <div className="flex items-center gap-1">
-                          {currentCount === totalCount && totalCount > 0 ? (
+
+                        {/* ✅ 모바일: 아이콘 + 카운트 */}
+                        <div className="flex items-center gap-1.5">
+                          {currentCount === null || totalCount === null ? (
+                            // 로딩 중 자리 유지
+                            <span className="inline-block h-4 w-4" />
+                          ) : isAllDone ? (
                             <LoadingDone className="h-4 w-4" />
                           ) : (
                             <Loading className="h-4 w-4" />
                           )}
+
                           <span className="text-brand-primary text-md-r">
-                            {currentCount}/{totalCount}
+                            {currentCount === null || totalCount === null
+                              ? "—/—"
+                              : `${currentCount}/${totalCount}`}
                           </span>
                         </div>
                       </div>
+
                       <ArrowDown
                         className={`text-icon-primary h-4 w-4 transition-transform ${
                           isDropdownOpen ? "rotate-180" : ""
                         }`}
                       />
                     </button>
+
                     {isDropdownOpen && (
                       <ul className="border-border-primary absolute z-70 mt-2 w-full overflow-hidden rounded-xl border bg-white shadow-2xl">
                         {taskGroups.map((group: TaskListResponse) => (
@@ -489,9 +602,10 @@ export default function ListPage() {
                       </ul>
                     )}
                   </div>
+
                   <button
                     onClick={() => setIsListModalOpen(true)}
-                    className="border-brand-primary text-brand-primary text-sm-sb bg-background-inverse flex shrink-0 items-center gap-1.5 rounded-4xl border px-4 py-3 shadow-sm active:scale-95"
+                    className="border-brand-primary text-brand-primary text-sm-sb bg-background-inverse flex shrink-0 items-center gap-1.5 rounded-4xl border px-4 py-2.5 shadow-sm active:scale-95 lg:py-3"
                   >
                     <PlusIcon className="h-3.5 w-3.5" />할 일 목록 추가
                   </button>
@@ -502,22 +616,35 @@ export default function ListPage() {
                   {isListLoading ? (
                     <p className="text-sm text-gray-400">불러오는 중...</p>
                   ) : taskGroups.length > 0 ? (
-                    taskGroups.map((group: TaskListResponse) => (
-                      <TaskGroupCard
-                        key={group.id}
-                        name={group.name}
-                        current={group.id === currentListId ? currentCount : 0}
-                        total={group.id === currentListId ? totalCount : 0}
-                        isActive={currentListId === group.id}
-                        onClick={() => handleSelectList(group.id)}
-                        onDelete={() => handleDeleteList(group.id)}
-                      />
-                    ))
+                    taskGroups.map((group: TaskListResponse) => {
+                      const isActive = currentListId === group.id;
+                      const counts = countsByListId[group.id]; // null이면 로딩중
+
+                      return (
+                        <TaskGroupCard
+                          key={group.id}
+                          name={group.name}
+                          current={counts ? counts.current : null}
+                          total={counts ? counts.total : null}
+                          status={
+                            counts
+                              ? counts.isAllDone
+                                ? "done"
+                                : "ongoing"
+                              : "loading"
+                          }
+                          isActive={isActive}
+                          onClick={() => handleSelectList(group.id)}
+                          onDelete={() => handleDeleteList(group.id)}
+                        />
+                      );
+                    })
                   ) : (
                     <p className="py-4 text-center text-sm text-gray-400">
                       생성된 목록이 없습니다.
                     </p>
                   )}
+
                   <button
                     onClick={() => setIsListModalOpen(true)}
                     className="border-brand-primary text-brand-primary text-sm-sb bg-background-inverse hover:bg-brand-primary group mt-4 flex h-10 w-full items-center justify-center gap-1.5 rounded-4xl border shadow-sm transition-all hover:text-white active:scale-95"
@@ -535,6 +662,7 @@ export default function ListPage() {
                   <h3 className="md:text-2xl-b text-color-tertiary text-xl font-bold">
                     {activeGroup.name}
                   </h3>
+
                   <div className="flex items-center gap-1 self-end md:self-auto">
                     <DatePagination
                       selectedDate={selectedDate}
@@ -549,7 +677,10 @@ export default function ListPage() {
                         setSelectedDate(d);
                       }}
                     />
-                    <div ref={calendarRef} className="relative">
+                    <div
+                      ref={calendarRef}
+                      className="bg-background-inverse relative z-60"
+                    >
                       <CalendarPicker
                         selectedDate={selectedDate}
                         onDateSelect={setSelectedDate}
@@ -587,11 +718,16 @@ export default function ListPage() {
                         role="button"
                         tabIndex={0}
                         onClick={() =>
-                          navigate(`${currentListId}/tasks/${task.id}`)
+                          navigate(
+                            `/team/${teamId}/tasklists/${currentListId}/tasks/${task.id}`,
+                          )
                         }
                         onKeyDown={(e) => {
-                          if (e.key === "Enter")
-                            navigate(`${currentListId}/tasks/${task.id}`);
+                          if (e.key === "Enter") {
+                            navigate(
+                              `/team/${teamId}/tasklists/${currentListId}/tasks/${task.id}`,
+                            );
+                          }
                         }}
                         className="cursor-pointer"
                       >
@@ -619,9 +755,7 @@ export default function ListPage() {
                                 : new Date().toISOString(),
                             })
                           }
-                          // ✅ 삭제 시 선택 모달 오픈
                           onDelete={() => openDeleteModal(task)}
-                          onEdit={() => console.log("수정")}
                         />
                       </div>
                     ))
@@ -690,7 +824,7 @@ export default function ListPage() {
         />
       </Modal>
 
-      {/* ✅ 삭제 선택 모달 */}
+      {/* 삭제 선택 모달 */}
       <Modal isOpen={isDeleteModalOpen} onClose={closeDeleteModal}>
         <div className="font-pretendard w-[320px] rounded-2xl bg-white p-6">
           <h3 className="text-color-primary text-lg font-bold">할 일 삭제</h3>
@@ -702,7 +836,6 @@ export default function ListPage() {
           </p>
 
           <div className="mt-5 flex flex-col gap-2">
-            {/* 공통: 이번 일정만 삭제 */}
             <button
               type="button"
               className="w-full rounded-xl bg-red-500 py-3 font-semibold text-white active:scale-95 disabled:opacity-50"
@@ -712,7 +845,6 @@ export default function ListPage() {
               이번 일정만 삭제
             </button>
 
-            {/* 반복일 때만: 전체 삭제 */}
             {deleteTarget?.frequency !== "ONCE" && (
               <button
                 type="button"

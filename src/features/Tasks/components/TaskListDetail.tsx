@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 import Dropdown from "@/components/common/Dropdown/Dropdown";
 import {
@@ -69,13 +70,18 @@ const daysAgo = (createdAt: string) => {
  * - `taskData`/`commentData`는 비동기 데이터이므로 optional chaining(`?.`)을 사용합니다.
  */
 export default function TaskListDetail() {
-  /** 라우트 파라미터: groupId, taskListId, taskId */
+  const queryClient = useQueryClient();
+
   const { teamId, listId, taskId } = useParams<{
     teamId: string;
     listId: string;
     taskId?: string;
   }>();
   const navigate = useNavigate();
+
+  const groupIdNum = Number(teamId);
+  const listIdNum = Number(listId);
+  const taskIdNum = Number(taskId);
 
   const [isOpen, setIsOpen] = useState<"taskDelete" | "replyDelete" | null>(
     null,
@@ -94,33 +100,51 @@ export default function TaskListDetail() {
   const { data: user } = useGetUser();
 
   /** Task 단건 데이터 */
-  const { data: taskData } = useGetTask(
-    Number(teamId),
-    Number(listId),
-    Number(taskId),
-  );
+  const { data: taskData } = useGetTask(groupIdNum, listIdNum, taskIdNum);
 
   /** Task 완료 여부 */
   const isDone = !!taskData?.doneAt;
 
   /** done 상태 변경 mutation */
   const { mutate: setDone } = useUpdateTaskListDone(
-    Number(teamId),
-    Number(listId),
-    Number(taskId),
+    groupIdNum,
+    listIdNum,
+    taskIdNum,
   );
 
+  // ListPage에 즉시 반영시키는 공통 invalidate
+  const invalidateListPage = () => {
+    // 현재 리스트의 tasks(날짜 상관 없이) 전부 갱신
+    queryClient.invalidateQueries({
+      predicate: (q) => {
+        const key = q.queryKey as unknown[];
+        return key?.[0] === "tasks" && key?.[1] === listIdNum;
+      },
+    });
+
+    // 사이드바 목록도 갱신
+    queryClient.invalidateQueries({ queryKey: ["taskLists", groupIdNum] });
+  };
+
   /** Task 완료 처리 */
-  const handleDone = () => setDone(true);
+  const handleDone = () => {
+    setDone(true, {
+      onSuccess: invalidateListPage,
+    });
+  };
 
   /** Task 완료 취소 처리 */
-  const handleUndoDone = () => setDone(false);
+  const handleUndoDone = () => {
+    setDone(false, {
+      onSuccess: invalidateListPage,
+    });
+  };
 
   /** Task 삭제 mutation */
   const { mutate: deleteTask } = useDeleteTask(
-    Number(teamId),
-    Number(listId),
-    Number(taskId),
+    groupIdNum,
+    listIdNum,
+    taskIdNum,
   );
 
   /** Task 삭제 모달 오픈 */
@@ -139,23 +163,37 @@ export default function TaskListDetail() {
 
   /** 할 일 삭제 후 모달 닫기 */
   const handleConfirmTaskDelete = () => {
-    deleteTask();
-    closeModal();
+    // 삭제 성공 시 리스트 갱신 + 패널 닫기(라우팅)
+    deleteTask(undefined as never, {
+      onSuccess: () => {
+        invalidateListPage();
+        closeModal();
+        navigate(`/team/${teamId}/tasklists/${listId}`);
+      },
+      onError: () => {
+        closeModal();
+      },
+    });
   };
+
+  /** 댓글 목록 데이터 */
+  const { data: commentData } = useGetTaskComment(taskIdNum);
+
+  /** 댓글 삭제 mutation */
+  const { mutate: deleteComment } = useDeleteTaskComment(taskIdNum);
 
   /** 댓글 삭제하고 모달 닫기 */
   const handleConfirmReplyDelete = () => {
     if (pendingReplyId === null) return;
-    deleteComment(pendingReplyId);
-    closeModal();
+    deleteComment(pendingReplyId, {
+      onSuccess: closeModal,
+      onError: closeModal,
+    });
   };
-
-  /** 댓글 목록 데이터 */
-  const { data: commentData } = useGetTaskComment(Number(taskId));
 
   /**
    * 시작 날짜 텍스트
-   * - recurring.startDate가 있으면 유틸로 날짜/시간 문자열로 변환
+   * * - recurring.startDate가 있으면 유틸로 날짜/시간 문자열로 변환
    * - 없으면 "-" 표시
    */
   const startDate = taskData?.recurring?.startDate;
@@ -168,7 +206,6 @@ export default function TaskListDetail() {
 
   /**
    * 반복 타입을 UI 라벨(한글)로 변환합니다.
-   *
    * @param {"ONCE" | "DAILY" | "WEEKLY" | "MONTHLY" | undefined} type - 반복 타입
    * @returns {"한 번" | "매일" | "주 반복" | "월 반복" | undefined} 라벨
    */
@@ -189,15 +226,9 @@ export default function TaskListDetail() {
   const [comment, setComment] = useState("");
 
   /** 댓글 생성 mutation + pending 상태 */
-  const { mutate: createComment, isPending } = useCreateTaskComment(
-    Number(taskId),
-  );
+  const { mutate: createComment, isPending } = useCreateTaskComment(taskIdNum);
 
-  /**
-   * 댓글 생성 요청
-   * - 공백만 있는 경우 요청하지 않습니다.
-   * - 성공 시 입력값을 초기화합니다.
-   */
+  /** 댓글 생성 요청 */
   const handleCreateComment = () => {
     if (!comment.trim()) return;
     createComment(comment, {
@@ -211,12 +242,7 @@ export default function TaskListDetail() {
   /** 수정 중인 댓글 입력값 */
   const [editComment, setEditComment] = useState("");
 
-  /**
-   * 댓글 편집 시작
-   *
-   * @param {number} commentId - 수정할 댓글 ID
-   * @param {string} currentComment - 기존 댓글 내용
-   */
+  /** 댓글 편집 시작 */
   const startEdit = (commentId: number, currentComment: string) => {
     setEditCommentId(commentId);
     setEditComment(currentComment);
@@ -229,24 +255,21 @@ export default function TaskListDetail() {
   };
 
   /** 댓글 수정 mutation */
-  const { mutate: updateComment } = useUpdateTaskComment(Number(taskId));
+  const { mutate: updateComment } = useUpdateTaskComment(taskIdNum);
 
-  /**
-   * 댓글 수정 저장
-   * - 공백만 있는 경우 저장하지 않습니다.
-   * - 저장 후 편집 모드를 해제합니다.
-   *
-   * @param {number} id - 수정할 댓글 ID
-   */
+  /** 댓글 수정 저장 */
   const saveEdit = (id: number) => {
     if (!editComment.trim()) return;
-    updateComment({ commentId: id, content: editComment });
-    setEditCommentId(null);
-    setEditComment("");
+    updateComment(
+      { commentId: id, content: editComment },
+      {
+        onSuccess: () => {
+          setEditCommentId(null);
+          setEditComment("");
+        },
+      },
+    );
   };
-
-  /** 댓글 삭제 mutation */
-  const { mutate: deleteComment } = useDeleteTaskComment(Number(taskId));
 
   /** 댓글 목록 최신순 정렬(createdAt 내림차순) */
   const sortedComments = useMemo(() => {
@@ -260,14 +283,12 @@ export default function TaskListDetail() {
   return (
     <>
       <div className="bg-background-primary flex flex-col gap-4 px-4 pt-3 pb-4 md:px-7 md:pt-11 lg:px-10">
-        {/* 닫기 아이콘 (라우팅/모달 닫기 등은 연결 필요) */}
         <CloseIcon
           className="cursor-pointer"
           onClick={() => navigate(`/team/${teamId}/tasklists/${listId}`)}
         />
 
         <div className="mt-4 flex flex-row justify-between md:mt-12">
-          {/* 완료 여부에 따른 타이틀 UI */}
           {isDone ? (
             <div className="flex h-[24px] flex-row items-center gap-2 md:h-[28px]">
               <div className="text-xl-b md:text-2xl-b text-color-default line-through">
@@ -283,7 +304,6 @@ export default function TaskListDetail() {
             </div>
           )}
 
-          {/* Task 액션 메뉴 (현재 onSelect 핸들링은 연결되지 않음) */}
           <Dropdown
             trigger="kebab"
             optionsKey="edit"
@@ -295,7 +315,6 @@ export default function TaskListDetail() {
         </div>
 
         <div className="flex flex-col gap-6">
-          {/* 작성자(또는 사용자) 정보 */}
           <div className="flex flex-row items-center gap-3">
             {user?.image ? (
               <img
@@ -309,7 +328,6 @@ export default function TaskListDetail() {
             <p className="text-md-m">{user?.nickname ?? "-"}</p>
           </div>
 
-          {/* 시작 날짜 / 반복 설정 + 완료 버튼 */}
           <div className="flex flex-row justify-between">
             <div className="flex flex-col gap-2">
               <div className="flex flex-row">
@@ -335,7 +353,6 @@ export default function TaskListDetail() {
               </div>
             </div>
 
-            {/* 완료 상태 토글 버튼 */}
             {isDone ? (
               <button
                 onClick={handleUndoDone}
@@ -357,7 +374,6 @@ export default function TaskListDetail() {
 
           <hr className="bg-border-primary h-[1px] border-0" />
 
-          {/* 본문 설명 */}
           <div>
             <p className="text-md-r text-color-primary">
               {taskData?.description}
@@ -365,7 +381,6 @@ export default function TaskListDetail() {
           </div>
         </div>
 
-        {/* 댓글 작성 영역 */}
         <div className="mt-5 flex flex-col gap-4">
           <p className="text-lg-b md:text-2lg-b text-color-primary flex gap-1">
             댓글
@@ -399,7 +414,6 @@ export default function TaskListDetail() {
         </div>
       </div>
 
-      {/* 댓글 목록 영역 */}
       <div className="bg-background-primary pb-10">
         {sortedComments?.map((item) => {
           const isEditing = editCommentId === item.id;
@@ -429,7 +443,6 @@ export default function TaskListDetail() {
                     {item.user.nickname}
                   </p>
 
-                  {/* 편집 모드가 아닐 때만 댓글 액션 메뉴 표시 */}
                   {!isEditing && (
                     <Dropdown
                       trigger="kebabSmall"
@@ -447,7 +460,6 @@ export default function TaskListDetail() {
                   )}
                 </div>
 
-                {/* 댓글 본문 / 편집 입력 */}
                 {isEditing ? (
                   <input
                     type="text"
@@ -466,7 +478,6 @@ export default function TaskListDetail() {
                   </>
                 )}
 
-                {/* 편집 모드 버튼 */}
                 {isEditing && (
                   <div className="flex flex-row justify-end gap-2 pt-2">
                     <button
@@ -488,6 +499,7 @@ export default function TaskListDetail() {
           );
         })}
       </div>
+
       <Modal isOpen={isOpen !== null} onClose={closeModal}>
         {isOpen === "taskDelete" && (
           <TaskDangerModal

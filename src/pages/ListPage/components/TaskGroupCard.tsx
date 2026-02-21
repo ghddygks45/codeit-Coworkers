@@ -1,10 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import KebabIcon from "@/assets/kebab.svg";
+import Loading from "@/assets/progress-ongoing.svg";
+import LoadingDone from "@/assets/progress-done.svg";
+
+type Status = "done" | "ongoing" | "loading";
 
 interface TaskGroupCardProps {
   name: string;
-  current: number;
-  total: number;
+
+  // 로딩 처리 위해 null 허용
+  current: number | null;
+  total: number | null;
+
+  // 아이콘 표시용 상태
+  status: Status;
+
   isActive?: boolean;
   onClick?: () => void;
   onEdit?: () => void;
@@ -15,6 +25,7 @@ export const TaskGroupCard = ({
   name,
   current,
   total,
+  status,
   isActive,
   onClick,
   onEdit,
@@ -33,6 +44,9 @@ export const TaskGroupCard = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const countText =
+    current === null || total === null ? "—/—" : `${current}/${total}`;
+
   return (
     <div
       onClick={onClick}
@@ -43,15 +57,29 @@ export const TaskGroupCard = ({
       }`}
     >
       <span
-        className={`text-md-m sm:text-lg-m truncate pr-2 ${isActive ? "text-brand-primary" : "text-color-primary"}`}
+        className={`text-md-m sm:text-lg-m truncate pr-2 ${
+          isActive ? "text-brand-primary" : "text-color-primary"
+        }`}
       >
         {name}
       </span>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        <span className="text-sm-sb text-brand-primary sm:text-md-sb">
-          {current}/{total}
-        </span>
+        {/* ✅ 아이콘이 0/0 앞쪽에 오도록 한 덩어리로 */}
+        <div className="flex items-center gap-1.5">
+          {status === "done" ? (
+            <LoadingDone className="h-4 w-4" />
+          ) : status === "ongoing" ? (
+            <Loading className="h-4 w-4" />
+          ) : (
+            // 로딩 중 레이아웃 흔들림 방지 (자리만 확보)
+            <span className="inline-block h-4 w-4" />
+          )}
+
+          <span className="text-sm-sb text-brand-primary sm:text-md-sb">
+            {countText}
+          </span>
+        </div>
 
         <div className="relative" ref={menuRef}>
           <button
@@ -60,6 +88,7 @@ export const TaskGroupCard = ({
               setIsMenuOpen(!isMenuOpen);
             }}
             className="hover:bg-background-secondary rounded-md p-1 transition-colors"
+            aria-label="목록 메뉴"
           >
             <KebabIcon className="text-icon-primary h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </button>
