@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
 
 import Dropdown from "@/components/common/Dropdown/Dropdown";
 import {
@@ -25,6 +24,10 @@ import Enter from "@/features/Boards/assets/enter.svg";
 import Modal from "@/components/common/Modal/Modal";
 import TaskDangerModal from "@/components/common/Modal/Contents/TaskDeleteModal";
 import TaskReplyDangerModal from "@/components/common/Modal/Contents/TaskReplyDeleteModal";
+import TaskUpdateModal from "@/components/common/Modal/Contents/TaskUpdateModal";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateTask } from "@/api/task";
+import { useUpdateRecurring } from "@/api/recurring";
 
 /**
  * 특정 시간(createdAt)이 현재로부터 며칠 전인지 계산합니다.
@@ -83,12 +86,13 @@ export default function TaskListDetail() {
   const listIdNum = Number(listId);
   const taskIdNum = Number(taskId);
 
-  const [isOpen, setIsOpen] = useState<"taskDelete" | "replyDelete" | null>(
-    null,
-  );
+  const [isOpen, setIsOpen] = useState<
+    "taskUpdate" | "taskDelete" | "replyDelete" | null
+  >(null);
   const [pendingReplyId, setPendingReplyId] = useState<number | null>(null);
 
   /** 모달 열기, 닫기 */
+  const openTaskUpdateModal = () => setIsOpen("taskUpdate");
   const openTaskDeleteModal = () => setIsOpen("taskDelete");
   const openReplyDeleteModal = () => setIsOpen("replyDelete");
   const closeModal = () => {
@@ -146,12 +150,6 @@ export default function TaskListDetail() {
     listIdNum,
     taskIdNum,
   );
-
-  /** Task 삭제 모달 오픈 */
-  const handleTaskDelete = (option: { value: string }) => {
-    if (option.value !== "삭제하기") return;
-    openTaskDeleteModal();
-  };
 
   /** 댓글 삭제시 해당 댓글 ID를 저장, 삭제후 모달 오픈 */
   const handleReplyDelete = (option: { value: string }, commentId: number) => {
@@ -280,6 +278,25 @@ export default function TaskListDetail() {
     );
   }, [commentData]);
 
+  const updateTaskMutation = useMutation({
+    mutationFn: (body: { name?: string; description?: string }) =>
+      updateTask(Number(teamId), Number(listId), Number(taskId), body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["task", Number(teamId), Number(listId), Number(taskId)],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["tasks", Number(listId)],
+      });
+      closeModal();
+    },
+  });
+
+  const updateRecurringMutation = useUpdateRecurring(
+    Number(teamId),
+    Number(listId),
+  );
+
   return (
     <>
       <div className="bg-background-primary flex flex-col gap-4 px-4 pt-3 pb-4 md:px-7 md:pt-11 lg:px-10">
@@ -310,7 +327,11 @@ export default function TaskListDetail() {
             listAlign="center"
             listClassName="absolute right-4 md:right-6 lg:right-10"
             keepSelected={false}
-            onSelect={handleTaskDelete}
+            // onSelect={handleTaskDelete}
+            onSelect={(option) => {
+              if (option.value === "수정하기") openTaskUpdateModal();
+              if (option.value === "삭제하기") openTaskDeleteModal();
+            }}
           />
         </div>
 
@@ -512,6 +533,68 @@ export default function TaskListDetail() {
           <TaskReplyDangerModal
             onClose={closeModal}
             onDelete={handleConfirmReplyDelete}
+          />
+        )}
+
+        {isOpen === "taskUpdate" && taskData && (
+          <TaskUpdateModal
+            key={taskData.id}
+            onClose={closeModal}
+            initialTask={{
+              id: taskData.id,
+              title: taskData.name,
+              description: taskData.description ?? "",
+              startDate: taskData.recurring?.startDate ?? taskData.date,
+              frequencyType: taskData.recurring?.frequencyType ?? "ONCE",
+              weekDays: taskData.recurring?.weekDays ?? [],
+            }}
+            isPending={
+              updateTaskMutation.isPending || updateRecurringMutation.isPending
+            }
+            onUpdate={(data) => {
+              const hasRecurring = Boolean(taskData.recurringId);
+
+              if (hasRecurring) {
+                updateTaskMutation.mutate({
+                  name: data.title,
+                  description: data.description,
+                });
+
+                updateRecurringMutation.mutate(
+                  {
+                    recurringId: taskData.recurringId,
+                    body: {
+                      name: data.title,
+                      description: data.description,
+                      startDate: data.startDate,
+                      frequencyType: data.frequencyType,
+                      monthDay: data.monthDay,
+                      weekDays:
+                        data.frequencyType === "WEEKLY" ? data.weekDays : [],
+                    },
+                  },
+                  {
+                    onSuccess: () => {
+                      queryClient.invalidateQueries({
+                        queryKey: [
+                          "task",
+                          Number(teamId),
+                          Number(listId),
+                          Number(taskId),
+                        ],
+                      });
+                      closeModal();
+                    },
+                  },
+                );
+                return;
+              }
+
+              updateTaskMutation.mutate({
+                name: data.title,
+                description: data.description,
+              });
+            }}
           />
         )}
       </Modal>
