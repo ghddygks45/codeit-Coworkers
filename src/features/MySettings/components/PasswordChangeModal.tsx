@@ -3,6 +3,8 @@ import Modal from "@/components/common/Modal/Modal";
 import { Input } from "@/components/common/Input/Input";
 import { useChangePassword } from "@/api/user";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import { Button } from "@/components/common/Button/Button";
+import { useToastStore } from "@/stores/useToastStore";
 
 interface PasswordChangeModalProps {
   isOpen: boolean;
@@ -29,6 +31,7 @@ export default function PasswordChangeModal({
   const [confirmError, setConfirmError] = useState("");
 
   const changePassword = useChangePassword();
+  const showToast = useToastStore((s) => s.show);
 
   const isValid =
     password.length > 0 &&
@@ -75,6 +78,7 @@ export default function PasswordChangeModal({
         onSuccess: () => {
           setPassword("");
           setPasswordConfirmation("");
+          showToast("비밀번호가 변경되었습니다.");
           onSuccess?.();
           onClose();
         },
@@ -127,21 +131,17 @@ export default function PasswordChangeModal({
         </div>
 
         <div className="mt-6 flex gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-color-primary border-border-primary text-md-sb h-12 flex-1 rounded-lg border-2 bg-white text-center"
-          >
+          <Button type="button" variant="close" onClick={onClose}>
             닫기
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={handleSubmit}
             disabled={!isValid || changePassword.isPending}
-            className="bg-brand-primary text-color-inverse text-md-sb hover:bg-interaction-hover h-12 flex-1 rounded-lg text-center transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+            className="transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
             {changePassword.isPending ? "변경 중..." : "변경하기"}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

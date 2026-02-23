@@ -1,5 +1,6 @@
 import Modal from "@/components/common/Modal/Modal";
 import AlertIcon from "@/assets/alert.svg";
+import { Button } from "@/components/common/Button/Button";
 
 interface ArticleDeleteModalProps {
   isOpen: boolean;
@@ -32,21 +33,18 @@ export default function ArticleDeleteModal({
           </p>
         </div>
         <div className="flex flex-row justify-center gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-lg-b text-color-default border-border-secondary h-[48px] w-[135px] rounded-[12px] border-[1px] border-solid text-center"
-          >
+          <Button variant="close" type="button" onClick={onClose}>
             닫기
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="danger"
             type="button"
             onClick={onConfirm}
             disabled={isPending}
-            className="bg-status-danger text-lg-b text-color-inverse h-[48px] w-[135px] rounded-[12px] text-center disabled:opacity-50"
+            className="disabled:opacity-50"
           >
             {isPending ? "삭제 중..." : "삭제하기"}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

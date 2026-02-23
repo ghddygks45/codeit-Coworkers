@@ -131,7 +131,7 @@ export default function PostCard({
   if (state === "best") {
     return (
       <article
-        className={`bg-background-inverse flex flex-col ${chipGap} rounded-[20px] ${widthClass}`}
+        className={`bg-background-inverse flex flex-col ${chipGap} rounded-[20px] cursor-pointer ${widthClass}`}
       >
         {/* 인기 칩 */}
         <div className="bg-background-secondary flex h-[30px] w-[72px] items-center justify-center gap-1 rounded-xl">
@@ -190,7 +190,7 @@ export default function PostCard({
   // Default 카드 레이아웃
   return (
     <article
-      className={`bg-background-inverse border-border-primary flex flex-col rounded-[20px] border ${widthClass} ${contentAuthorGap}`}
+      className={`bg-background-inverse border-border-primary flex flex-col rounded-[20px] border transition-colors hover:bg-background-secondary ${widthClass} ${contentAuthorGap}`}
     >
       {/* 제목 + 본문 + 이미지 */}
       <div className="flex flex-1 items-start gap-2">

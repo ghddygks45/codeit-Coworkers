@@ -115,6 +115,7 @@ export function useUpdateTask(groupId: number) {
     }) => updateTask(groupId, taskListId, taskId, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["group", groupId] });
+      queryClient.invalidateQueries({ queryKey: ["allTasks", groupId] });
     },
   });
 }

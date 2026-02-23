@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/common/Button/Button";
 import { Input } from "@/components/common/Input/Input";
 import { sendResetPasswordEmail } from "@/api/user";
+import { useToastStore } from "@/stores/useToastStore";
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ export default function ForgotPasswordModal({
   isOpen,
   onClose,
 }: ForgotPasswordModalProps) {
+  const toast = useToastStore();
   const {
     register,
     handleSubmit,
@@ -29,10 +31,12 @@ export default function ForgotPasswordModal({
 
       await sendResetPasswordEmail({
         email: data.email,
-        redirectUrl: `${REDIRECT_URL}/reset-password`,
+        redirectUrl: `${REDIRECT_URL}`,
       });
 
-      alert("비밀번호 재설정 이메일이 전송되었습니다. 메일함을 확인해주세요.");
+      toast.show(
+        "비밀번호 재설정 이메일이 전송되었습니다. 메일함을 확인해주세요.",
+      );
       reset();
       onClose();
     } catch (error) {
@@ -40,7 +44,7 @@ export default function ForgotPasswordModal({
       if (error instanceof Error) {
         message = error.message;
       }
-      alert(message);
+      toast.show(message);
     }
   };
 

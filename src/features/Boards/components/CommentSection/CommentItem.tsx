@@ -9,6 +9,7 @@ import {
   useDeleteArticleComment,
 } from "@/api/articleComment";
 import type { ArticleComment } from "@/types/articleComment";
+import { Button } from "@/components/common/Button/Button";
 
 interface CommentItemProps {
   comment: ArticleComment;
@@ -145,21 +146,22 @@ export default function CommentItem({
             </p>
           </div>
           <div className="flex flex-row justify-center gap-2">
-            <button
+            <Button
               type="button"
+              variant="close"
               onClick={() => setIsDeleteModalOpen(false)}
-              className="text-lg-b text-color-default border-border-secondary h-[48px] w-[135px] rounded-[12px] border-[1px] border-solid text-center"
             >
               닫기
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="danger"
               onClick={handleDeleteConfirm}
               disabled={deleteComment.isPending}
-              className="bg-status-danger text-lg-b text-color-inverse h-[48px] w-[135px] rounded-[12px] text-center disabled:opacity-50"
+              className="disabled:opacity-50"
             >
               {deleteComment.isPending ? "삭제 중..." : "삭제하기"}
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>

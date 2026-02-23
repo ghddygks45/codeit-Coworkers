@@ -2,25 +2,24 @@ import Modal from "@/components/common/Modal/Modal";
 import ListCreateModal from "@/components/common/Modal/Contents/ListCreateModal";
 import ListEditModal from "@/components/common/Modal/Contents/ListEditModal";
 import ListDeleteModal from "@/components/common/Modal/Contents/ListDeleteModal";
-import { TaskListServer } from "@/types/taskList";
-import { ModalType } from "../hooks/useTaskColumnModals";
+import { ModalType, TaskListClient } from "../hooks/useTaskListModals";
 import { useParams } from "react-router-dom";
 
-interface TaskColumnModalsProps {
+interface TaskListModalsProps {
   modalType: ModalType;
-  selectedTaskList: TaskListServer | null;
+  selectedTaskList: TaskListClient | null;
   closeModal: () => void;
 }
 
-export default function TaskColumnModals({
+export default function TaskListModals({
   modalType,
   selectedTaskList,
   closeModal,
-}: TaskColumnModalsProps) {
-  const { id } = useParams<{ id: string }>();
-  const groupId = Number(id);
+}: TaskListModalsProps) {
+  const { id, teamId: teamIdParam } = useParams();
+  const groupId = Number(id ?? teamIdParam);
 
-  if (!groupId) return;
+  if (!groupId) return null;
 
   return (
     <>

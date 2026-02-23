@@ -3,6 +3,7 @@ import Close from "@/assets/close.svg";
 import { useToastStore } from "@/stores/useToastStore";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
+import { Button } from "../../Button/Button";
 
 type InviteModalProps = {
   onClose: () => void;
@@ -33,15 +34,15 @@ export default function InviteModal({ onClose }: InviteModalProps) {
             그룹에 참여할 수 있는 링크를 복사합니다.
           </p>
         </div>
-        <button
+        <Button
           type="button"
-          className="bg-brand-primary text-lg-b text-color-inverse h-[48px] w-[280px] rounded-[12px] text-center"
+          size="authWide"
           onClick={() => {
             linkCopyHandler();
           }}
         >
           링크 복사하기
-        </button>
+        </Button>
         {showLink && (
           <div className="mt-6 flex flex-col">
             <div className="text-md-m text-color-disabled md:text-color-primary">

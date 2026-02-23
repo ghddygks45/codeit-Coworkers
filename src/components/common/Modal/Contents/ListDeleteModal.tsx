@@ -1,11 +1,12 @@
 import { useDeleteTaskList } from "@/api/tasklist";
 import Alert from "@/assets/alert.svg";
 import { useToastStore } from "@/stores/useToastStore";
-import { TaskListServer } from "@/types/taskList";
+type TaskListClient = { id: number; name: string };
+import { Button } from "../../Button/Button";
 
 type ListDeleteModalProps = {
   onClose: () => void;
-  selectedTaskList: TaskListServer | null;
+  selectedTaskList: TaskListClient | null;
   groupId: number;
 };
 
@@ -33,26 +34,24 @@ export default function ListDeleteModal({
         </div>
         <div className="mt-2 flex flex-col gap-2">
           <h2 className="text-lg-m text-color-primary">
-            {selectedTaskList.name} 목록을 삭제하시겠어요?
+            {selectedTaskList.name.replace("{status:doing}", "").trim()} 목록을
+            삭제하시겠어요?
           </h2>
         </div>
         <div className="mt-7 flex flex-row justify-center gap-2">
-          <button
-            onClick={onClose}
-            className="text-lg-b text-color-default border-border-secondary h-[48px] w-[135px] rounded-[12px] border-[1px] border-solid text-center"
-          >
+          <Button onClick={onClose} variant="close">
             닫기
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
-            className="bg-status-danger text-lg-b text-color-inverse h-[48px] w-[135px] rounded-[12px] text-center"
+            variant="danger"
             onClick={() => {
               handleDelete(selectedTaskList.id);
               onClose();
             }}
           >
-            가차없이 삭제
-          </button>
+            삭제
+          </Button>
         </div>
       </div>
     </>

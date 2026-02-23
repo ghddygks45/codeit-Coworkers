@@ -6,6 +6,7 @@ import Modal from "@/components/common/Modal/Modal";
 import { useState } from "react";
 import RemoveMemberModal from "./RemoveMemberModal";
 import MemberItem from "./MemberItem";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 type Member = {
   userId: number;
@@ -26,11 +27,10 @@ export default function TeamMemberSection({ groupId }: TeamMemberSectionProps) {
   // 데이터 요청
   const { data: groupData } = useGroup(groupId);
   const { data: user } = useUser();
-
   const currentUserId = user.id;
 
-  const isAdmin =
-    user?.memberships.find((m) => m.groupId === groupData.id)?.role === "ADMIN";
+  // 관리자 여부
+  const isAdmin = useIsAdmin(groupId);
 
   const members = groupData?.members || [];
   const memberCount = members.length;

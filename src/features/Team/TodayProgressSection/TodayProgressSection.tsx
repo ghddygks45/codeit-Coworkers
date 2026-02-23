@@ -1,8 +1,8 @@
 import { useGroup, useAllTasks } from "@/api/group";
-import { useUser } from "@/api/user";
 import GroupHeader from "./components/GroupHeader";
 import ProgressStats from "./components/ProgressStats";
 import ProgressBar from "./components/ProgressBar";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 type TodayProgressSectionProps = {
   groupId: number;
@@ -13,13 +13,10 @@ export default function TodayProgressSection({
 }: TodayProgressSectionProps) {
   // 데이터 조회
   const { data: groupData } = useGroup(groupId);
-  const { data: user } = useUser();
   const { data: allTasks } = useAllTasks(groupId);
 
-  // 관리자 여부 확인
-  const isAdmin =
-    user?.memberships.find((member) => member.groupId === groupData.id)
-      ?.role === "ADMIN";
+  // 관리자 여부
+  const isAdmin = useIsAdmin(groupId);
 
   // 진행도 계산
   const totalCount = allTasks.length;

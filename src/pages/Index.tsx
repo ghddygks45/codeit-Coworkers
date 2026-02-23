@@ -114,7 +114,7 @@ export default function Index() {
             className="relative w-full"
           >
             <div className="flex w-full flex-col items-start md:flex-row">
-              <div className="sticky top-0 z-50 h-auto shrink-0 md:h-screen">
+              <div className="h-auto w-full md:sticky md:top-0 md:z-50 md:h-screen md:w-auto md:shrink-0">
                 <Gnb />
               </div>
               <section className="w-full overflow-hidden">
@@ -212,9 +212,7 @@ export default function Index() {
 
             <motion.div
               onClick={() => {
-                if (isAtBottom) {
-                  navigate(isLoggedIn ? "/team" : "/login");
-                }
+                navigate(isLoggedIn ? "/team" : "/login");
               }}
               animate={{
                 position: "fixed",

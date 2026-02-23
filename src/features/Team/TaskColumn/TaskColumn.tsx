@@ -1,11 +1,11 @@
 import React, { useMemo } from "react";
 import { useGroup } from "@/api/group";
 import TaskCard from "./components/TaskCard";
-import TaskColumnModals from "./components/TaskColumnModals";
-import { useTaskColumnModals } from "./hooks/useTaskColumnModals";
+import TaskListModals from "@/features/common/components/TaskListModals";
+import { useTaskListModals } from "@/features/common/hooks/useTaskListModals";
 import { useTaskDragDrop } from "./hooks/useTaskDragDrop";
 import { Button } from "@/components/common/Button/Button";
-import PlusBlue from "@/assets/plus_blue.svg";
+import Plus from "@/assets/plus.svg";
 import FoldTrue from "@/assets/fold-true.svg";
 import FoldFalse from "@/assets/fold-false.svg";
 import { Link } from "react-router-dom";
@@ -41,7 +41,7 @@ export default function TaskColumn({
   } = useTaskDragDrop({ groupId, taskLists });
 
   const { modalType, selectedTaskList, openModal, closeModal } =
-    useTaskColumnModals();
+    useTaskListModals();
 
   // 특정 위치에 드롭 플레이스홀더를 표시할지 여부
   const showPlaceholderAt = (column: KanbanStatus, index: number) =>
@@ -86,7 +86,7 @@ export default function TaskColumn({
           <Button
             size="todoAdd"
             variant="default"
-            icon={<PlusBlue className="h-4 w-4" />}
+            icon={<Plus className="text-icon-inverse h-4 w-4" />}
             onClick={() => openModal("ListCreate", null)}
           >
             목록 추가
@@ -231,7 +231,7 @@ export default function TaskColumn({
         </div>
       </div>
 
-      <TaskColumnModals
+      <TaskListModals
         modalType={modalType}
         selectedTaskList={selectedTaskList}
         closeModal={closeModal}

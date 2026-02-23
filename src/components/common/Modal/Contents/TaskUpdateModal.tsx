@@ -5,6 +5,7 @@ import CalendarDate from "../../Calendar/CalendarDate";
 import CalendarTime from "../../Calendar/CalendarTime";
 import getDateTime from "@/utils/dateTime";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { Button } from "../../Button/Button";
 
 type RepeatType = "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
 
@@ -330,21 +331,23 @@ export default function TaskUpdateModal({
       </div>
 
       <div className="flex flex-row gap-2">
-        <button
+        <Button
+          variant="close"
+          size="authWide"
           onClick={onClose}
           disabled={isPending}
-          className="border-border-primary w-1/2 rounded-xl border-1"
         >
           취소하기
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          size="authWide"
           onClick={handleSubmit}
           disabled={isPending}
-          className="bg-brand-primary text-lg-b h-12 w-1/2 rounded-xl text-white transition-all active:scale-[0.98]"
+          className="transition-all active:scale-[0.98]"
         >
           {isPending ? "수정 중..." : "수정하기"}
-        </button>
+        </Button>
       </div>
     </div>
   );

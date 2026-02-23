@@ -177,14 +177,18 @@ function DesktopBestPostCarousel({
     setCurrentPage((prev) => Math.min(maxPage, prev + 1));
 
   return (
-    <section className="bg-background-secondary rounded-xl p-6">
+    <section className="bg-background-secondary min-w-0 overflow-hidden rounded-xl p-6">
       {/* 헤더 */}
       <h2 className={`${titleClass} text-color-primary mb-6`}>베스트 게시글</h2>
 
       {/* 카드 영역 */}
-      <div className="flex justify-center gap-3">
+      <div className="flex gap-3">
         {visiblePosts.map((post) => (
-          <Link key={post.id} to={`/boards/${post.id}`} className="flex-none">
+          <Link
+            key={post.id}
+            to={`/boards/${post.id}`}
+            className="min-w-0 flex-1"
+          >
             <PostCard
               state="best"
               size={cardSize}
@@ -194,6 +198,7 @@ function DesktopBestPostCarousel({
               date={post.date}
               likeCount={post.likeCount}
               imageUrl={post.imageUrl}
+              fullWidth
             />
           </Link>
         ))}

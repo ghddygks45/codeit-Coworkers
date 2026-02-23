@@ -52,7 +52,7 @@ const variantClassMap: Record<ButtonVariant, string> = {
   `,
   close: `
     border
-    border-color-secondary
+    border-border-secondary
     text-color-default
     bg-background-primary
     hover:bg-background-secondary

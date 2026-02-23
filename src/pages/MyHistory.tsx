@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useMyHistory } from "@/features/MyHistory/useMyHistory";
 import { useMyHistoryData } from "@/features/MyHistory/useMyHistoryData";
-import MyHistoryHeader from "@/features/MyHistory/MyHistoryHeader";
+import TeamHeader from "@/features/common/components/TeamHeader";
 import MyHistorySidebar from "@/features/MyHistory/MyHistorySidebar";
 import MyHistoryContent from "@/features/MyHistory/MyHistoryContent";
 
@@ -28,7 +28,7 @@ export default function MyHistory() {
 
   return (
     <div className="bg-background-secondary min-h-screen px-[16px] pt-[17px] pb-[40px] md:px-[26px] md:py-[70px] lg:px-[85px] lg:pt-[90px]">
-      <MyHistoryHeader groupId={Number(groupId)} />
+      <TeamHeader groupId={Number(groupId)} className="lg:max-w-[1120px]" />
       <div className="flex gap-[40px]">
         <MyHistorySidebar
           selectedDate={selectedDate}

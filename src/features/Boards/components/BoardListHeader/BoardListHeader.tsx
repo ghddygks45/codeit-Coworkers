@@ -24,8 +24,10 @@ export default function BoardListHeader({
         isMobile ? "flex flex-col gap-5" : "flex items-center justify-between"
       }`}
     >
-      <h1 className={`${titleClass} text-color-primary`}>자유게시판</h1>
-      <div className={isMobile ? "w-full" : "w-[420px]"}>
+      <h1 className={`${titleClass} text-color-primary shrink-0 whitespace-nowrap`}>
+        자유게시판
+      </h1>
+      <div className={isMobile ? "w-full" : "min-w-0 flex-1 max-w-[420px]"}>
         <Input
           variant="search"
           withSearchIcon

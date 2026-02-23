@@ -11,18 +11,20 @@ import { useNavigate } from "react-router-dom";
 /** 카드 폼 스켈레톤 (입력 + 버튼) */
 function JoinTeamSkeleton() {
   return (
-    <div className="flex h-[100vh] flex-col items-center justify-center">
-      <div className="bg-background-primary w-[calc(100%-20px)] max-w-[550px] rounded-[20px] px-[20px] pt-[52px] pb-[74px] md:px-[45px] md:pt-[61px] md:pb-[64px]">
-        <div className="bg-background-tertiary mb-[32px] h-8 w-32 animate-pulse rounded md:mb-[48px]" />
-        <div className="mt-[12px] space-y-2 md:mt-[32px]">
-          <div className="bg-background-tertiary h-4 w-16 animate-pulse rounded" />
-          <div className="bg-background-tertiary h-12 w-full animate-pulse rounded-lg" />
-        </div>
-        <div className="mt-[40px]">
-          <div className="bg-background-tertiary h-12 w-full animate-pulse rounded-lg" />
-        </div>
-        <div className="mt-[20px] flex justify-center md:mt-[24px]">
-          <div className="bg-background-tertiary h-4 w-64 animate-pulse rounded" />
+    <div className="bg-background-secondary">
+      <div className="flex h-[100vh] flex-col items-center justify-center">
+        <div className="bg-background-primary w-[calc(100%-20px)] max-w-[550px] rounded-[20px] px-[20px] pt-[52px] pb-[74px] md:px-[45px] md:pt-[61px] md:pb-[64px]">
+          <div className="bg-background-tertiary mb-[32px] h-8 w-32 animate-pulse rounded md:mb-[48px]" />
+          <div className="mt-[12px] space-y-2 md:mt-[32px]">
+            <div className="bg-background-tertiary h-4 w-16 animate-pulse rounded" />
+            <div className="bg-background-tertiary h-12 w-full animate-pulse rounded-lg" />
+          </div>
+          <div className="mt-[40px]">
+            <div className="bg-background-tertiary h-12 w-full animate-pulse rounded-lg" />
+          </div>
+          <div className="mt-[20px] flex justify-center md:mt-[24px]">
+            <div className="bg-background-tertiary h-4 w-64 animate-pulse rounded" />
+          </div>
         </div>
       </div>
     </div>
@@ -75,7 +77,7 @@ function JoinTeamContent() {
   };
 
   return (
-    <>
+    <div className="bg-background-secondary">
       <div className="flex h-[100vh] flex-col items-center justify-center">
         <div className="bg-background-primary w-[calc(100%-20px)] max-w-[550px] rounded-[20px] px-[20px] pt-[52px] pb-[74px] md:px-[45px] md:pt-[61px] md:pb-[64px]">
           <h3 className="text-color-primary text-xl-b md:text-2xl-b mb-[32px] md:mb-[48px]">
@@ -114,7 +116,7 @@ function JoinTeamContent() {
           </p>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

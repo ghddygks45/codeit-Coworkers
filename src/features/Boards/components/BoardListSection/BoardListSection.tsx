@@ -61,7 +61,7 @@ export default function BoardListSection({
           articles={displayArticles}
           gridClass={gridClass}
           cardSize={cardSize}
-          fullWidth={isMobile || isTablet}
+          fullWidth
         />
       ) : (
         <BoardListEmpty keyword={debouncedKeyword || undefined} />

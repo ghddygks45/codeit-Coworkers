@@ -2,6 +2,7 @@ import { useDeleteGroup } from "@/api/group";
 import { useGroups } from "@/api/user";
 import Alert from "@/assets/alert.svg";
 import { useNavigate, useParams } from "react-router-dom";
+import { Button } from "../../Button/Button";
 
 type DangerModalProps = {
   onClose: () => void;
@@ -39,18 +40,12 @@ export default function DangerModal({ onClose }: DangerModalProps) {
         </p>
       </div>
       <div className="flex flex-row justify-center gap-2">
-        <button
-          onClick={onClose}
-          className="text-lg-b text-color-default border-border-secondary h-[48px] w-[135px] rounded-[12px] border-[1px] border-solid text-center"
-        >
+        <Button variant="close" type="button" onClick={onClose}>
           닫기
-        </button>
-        <button
-          className="bg-status-danger text-lg-b text-color-inverse h-[48px] w-[135px] rounded-[12px] text-center"
-          onClick={handleGroupIdDelete}
-        >
+        </Button>
+        <Button variant="danger" type="button" onClick={handleGroupIdDelete}>
           팀 삭제
-        </button>
+        </Button>
       </div>
     </div>
   );

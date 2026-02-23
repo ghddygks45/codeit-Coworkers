@@ -8,7 +8,7 @@ export default function FloatingWriteButton() {
   return (
     <Link
       to="/boards/write"
-      className="bg-brand-primary hover:bg-interaction-hover fixed right-[120px] bottom-[76px] flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-colors"
+      className="bg-brand-primary fixed right-[120px] bottom-[76px] flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95"
     >
       <PlusIcon className="h-6 w-6 text-white" />
     </Link>

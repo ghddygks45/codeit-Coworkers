@@ -10,7 +10,8 @@ export default function DesktopTeamSelector() {
   const isFolded = useGnbStore((state) => state.isFolded);
   const [isOpen, setIsOpen] = useState(true);
 
-  const { id: teamId } = useParams();
+  const { id, teamId: teamIdParam } = useParams();
+  const teamId = id ?? teamIdParam;
   const isTeamSelected = teamId !== undefined;
 
   const { data: group } = useGroups();

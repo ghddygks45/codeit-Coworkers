@@ -3,6 +3,7 @@ import AlertIcon from "@/assets/alert.svg";
 import { useDeleteUser } from "@/api/user";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/common/Button/Button";
 
 interface WithdrawModalProps {
   isOpen: boolean;
@@ -42,21 +43,18 @@ export default function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
           그룹장으로 있는 그룹은 자동으로 삭제되고, 모든 그룹에서 나가집니다.
         </p>
         <div className="flex justify-center gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-color-default border-border-primary text-md-sb h-12 w-[135px] rounded-lg border bg-white text-center"
-          >
+          <Button type="button" variant="close" onClick={onClose}>
             닫기
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="danger"
             onClick={handleWithdraw}
             disabled={deleteUser.isPending}
-            className="bg-status-danger text-color-inverse text-md-sb h-12 w-[135px] rounded-lg text-center disabled:opacity-50"
+            className="disabled:opacity-50"
           >
             {deleteUser.isPending ? "처리 중..." : "회원 탈퇴"}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

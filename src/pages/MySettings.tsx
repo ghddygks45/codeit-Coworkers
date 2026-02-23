@@ -10,6 +10,7 @@ import WithdrawModal from "@/features/MySettings/components/WithdrawModal";
 import AlertIcon from "@/assets/alert-white.svg";
 import PencilIcon from "@/assets/pencil.svg";
 import SecessionIcon from "@/assets/secession.svg";
+import UserDefaultProfile from "@/assets/user.svg";
 
 /**
  * 계정 설정 페이지
@@ -153,11 +154,17 @@ function MySettingsContent() {
                 className="relative inline-block disabled:opacity-70"
                 aria-label="프로필 이미지 변경"
               >
-                <img
-                  src={profileImageUrl}
-                  alt="프로필"
-                  className={`${profileSize} ${profileRadius} object-cover ${uploadImageMutation.isPending ? "animate-pulse" : ""}`}
-                />
+                {profileImageUrl ? (
+                  <img
+                    src={profileImageUrl}
+                    alt="프로필"
+                    className={`${profileSize} ${profileRadius} object-cover ${uploadImageMutation.isPending ? "animate-pulse" : ""}`}
+                  />
+                ) : (
+                  <UserDefaultProfile
+                    className={`${profileSize} ${profileRadius} ${uploadImageMutation.isPending ? "animate-pulse" : ""}`}
+                  />
+                )}
                 <span
                   className={`bg-background-secondary [&_path]:!fill-icon-primary absolute right-[-9px] bottom-[-9px] flex items-center justify-center rounded-full shadow md:right-[-16px] md:bottom-[-16px] ${isMobile ? "h-[18px] w-[18px]" : "h-8 w-8"}`}
                 >
@@ -230,7 +237,7 @@ function MySettingsContent() {
             {/* 회원 탈퇴하기 */}
             <button
               type="button"
-              className="text-status-danger flex items-center gap-2"
+              className="text-status-danger flex items-center gap-2 transition-opacity hover:opacity-70"
               onClick={() => setWithdrawModalOpen(true)}
             >
               <SecessionIcon className="h-5 w-5" />

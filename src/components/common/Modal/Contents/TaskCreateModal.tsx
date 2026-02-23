@@ -5,6 +5,7 @@ import CalendarDate from "../../Calendar/CalendarDate";
 import CalendarTime from "../../Calendar/CalendarTime";
 import getDateTime from "@/utils/dateTime";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { Button } from "../../Button/Button";
 
 export interface TaskData {
   title: string;
@@ -286,13 +287,14 @@ export default function TaskCreateModal({
         </div>
       </div>
 
-      <button
+      <Button
         type="button"
+        size="authWide"
         onClick={handleSubmit}
-        className="bg-brand-primary text-lg-b h-12 w-full rounded-xl text-white transition-all active:scale-[0.98]"
+        className="transition-all active:scale-[0.98]"
       >
         만들기
-      </button>
+      </Button>
     </div>
   );
 }

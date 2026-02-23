@@ -11,7 +11,7 @@ import TeamImageUpload from "@/features/Team/components/TeamImageUpload";
 /** 카드 폼 스켈레톤 (이미지 + 입력 + 버튼) */
 function EditTeamSkeleton() {
   return (
-    <div>
+    <div className="bg-background-secondary">
       <div className="flex h-[100vh] flex-col items-center justify-center">
         <div className="bg-background-primary w-[calc(100%-20px)] max-w-[550px] rounded-[20px] px-[20px] pt-[52px] pb-[74px] md:px-[45px] md:pt-[61px] md:pb-[64px]">
           <div className="bg-background-tertiary mb-[32px] h-8 w-32 animate-pulse rounded md:mb-[48px]" />
@@ -89,7 +89,7 @@ function EditTeamContent() {
   };
 
   return (
-    <div>
+    <div className="bg-background-secondary">
       <div className="flex h-[100vh] flex-col items-center justify-center">
         <div className="bg-background-primary w-[calc(100%-20px)] max-w-[550px] rounded-[20px] px-[20px] pt-[52px] pb-[74px] md:px-[45px] md:pt-[61px] md:pb-[64px]">
           <h3 className="text-color-primary text-xl-b md:text-2xl-b mb-[32px] md:mb-[48px]">

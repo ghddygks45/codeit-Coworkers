@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { TaskListServer } from "@/types/taskList";
 
 export type ModalType = "ListCreate" | "ListEdit" | "ListDelete" | null;
+export type TaskListClient = { id: number; name: string };
 
-export function useTaskColumnModals() {
+export function useTaskListModals() {
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedTaskList, setSelectedTaskList] =
-    useState<TaskListServer | null>(null);
+    useState<TaskListClient | null>(null);
 
   const openModal = (
     type: ModalType,
-    selectedTaskList: TaskListServer | null = null,
+    selectedTaskList: TaskListClient | null = null,
   ) => {
     if (selectedTaskList) {
       setSelectedTaskList(selectedTaskList);
