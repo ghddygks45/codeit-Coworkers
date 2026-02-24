@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { RoundedBox, Text, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -7,6 +7,12 @@ function Scene() {
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
   const meshRef = useRef<THREE.Mesh>(null);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = "auto";
+    };
+  }, []);
 
   useFrame((state) => {
     if (meshRef.current) {
