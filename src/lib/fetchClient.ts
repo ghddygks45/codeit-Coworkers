@@ -58,8 +58,10 @@ export async function fetchClient<T>(
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("tokenExpiry");
-      useToastStore.getState().showError("로그인 세션이 만료되었습니다.");
-      window.location.href = "/login";
+      if (token) {
+        useToastStore.getState().showError("로그인 세션이 만료되었습니다.");
+        window.location.href = "/login";
+      }
     }
     let errorData = null;
     try {
