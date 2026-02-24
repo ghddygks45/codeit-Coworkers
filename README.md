@@ -20,7 +20,7 @@
 
 |                              프로필                              |         이름          | 역할 (Domain)                                                                                                         | 컴포넌트 (Components)                           | GitHub                                                       |
 | :--------------------------------------------------------------: | :-------------------: | :-------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------- | :----------------------------------------------------------- |
-|     <img src="https://github.com/ghddygks45.png" width="80">     | **홍요한**<br/>(팀장) | **팀 관리 도메인**<br/>- 팀 생성, 수정, 삭제 및 멤버 관리<br/>- 팀 대시보드 및 진행 상황 연동                         | **GNB**                                         | [@ghddygks45](https://github.com/ghddygks45)                 |
+|     <img src="https://github.com/ghddygks45.png" width="40">     | **홍요한**<br/>(팀장) | **팀 관리 도메인**<br/>- 팀 생성, 수정, 삭제 및 멤버 관리<br/>- 팀 대시보드 및 진행 상황 연동                         | **GNB**                                         | [@ghddygks45](https://github.com/ghddygks45)                 |
 |     <img src="https://github.com/summerlane.png" width="40">     |      **이규화**       | **할 일 상세 도메인**<br/>- Task 칸반 보드 렌더링 및 드래그 앤 드롭<br/>- 할 일 상세 정보 조회 및 수정                | **모달(Modal)**<br/>**드롭다운(Dropdown)**      | [@summerlane](https://github.com/summerlane)                 |
 |     <img src="https://github.com/dayeon0706.png" width="40">     |      **김다연**       | **게시판(Board) 도메인**<br/>- 자유로운 소통을 위한 게시판 CRUD<br/>- 베스트 게시글 캐러셀 및 댓글 기능               | **배지(Badge)**<br/>**칩(Chip)**                | [@dayeon0706](https://github.com/dayeon0706)                 |
 |       <img src="https://github.com/Gyo50.png" width="40">        |      **오영교**       | **인증 & 랜딩 도메인**<br/>- 이메일/소셜(Kakao) 로그인 및 회원가입<br/>- 서비스 소개 랜딩 페이지 구현                 | **버튼(Button)**<br/>**인풋(Input)**            | [@Gyo50](https://github.com/Gyo50)                           |
@@ -57,11 +57,6 @@
 
 리스트 뷰는 업무의 흐름(flow)을 보여주지 못합니다.
 칸반은 "지금 팀이 어디에 있는지"를 한 화면에서 보여줍니다.
-
-### 왜 게시판을 함께 넣었나?
-
-할 일 관리 툴만으로는 팀의 맥락(context)을 공유하기 어렵습니다.
-공지, 아이디어, 회고를 팀 공간 안에서 해결할 수 있도록 커뮤니티 게시판을 함께 두었습니다.
 
 ### 왜 개인 히스토리(My History)인가?
 
@@ -137,6 +132,7 @@ graph LR
     class Feature1,Feature2,Feature3 featureStyle
 ```
 
+<br/>
 <br/>
 
 ## ✨ 주요 기능 (Key Features)
@@ -225,10 +221,10 @@ src/
 
 ## ⚙️ 기술 의사결정 (Technical Decisions)
 
-| 선택                                                           | 이유                                                                                                                                                                                                                                              |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[React (SPA)](위키_링크)**                                   | 사용자 범위가 제한적인 서비스로 SEO 이점이 크지 않고, 실시간에 가까운 상태 변화가 많아 CSR 흐름이 더 자연스럽습니다. "굳이 Next.js여야 하는 이유"를 설명하기 어렵다고 판단해, 구조가 단순하고 실무자가 보았을 때 자연스러운 React를 선택했습니다. |
-| **[상태 관리 전략](위키_링크)**<br/>(TanStack Query + Zustand) | 서버 상태는 TanStack Query로, 클라이언트 상태는 Zustand로 역할을 분리했습니다. Redux의 보일러플레이트 없이 각 역할에 맞는 도구를 선택했습니다.                                                                                                    |
-| **[Tailwind CSS](위키_링크)**                                  | 협업 환경에서 클래스 기반 스타일링으로 일관성을 유지하고, 별도의 스타일 파일 없이 컴포넌트 단위로 빠르게 작업할 수 있어 선택했습니다.                                                                                                             |
-| **[ErrorBoundary / Suspense](위키_링크)**                      | 에러와 로딩 처리를 각 컴포넌트에 분산하지 않고, 책임을 명확히 분리하기 위해 도입했습니다.                                                                                                                                                         |
-| **[HOC (withAuth)](위키_링크)**                                | 인증 필요 페이지마다 중복 로직을 작성하지 않고, HOC로 일관된 접근 제어를 구현했습니다.                                                                                                                                                            |
+| 선택 | 이유 |
+|------|------|
+| **[React (SPA)](https://github.com/codeit-Coworkers/coworkers/wiki/%EA%B8%B0%EC%88%A0-%EC%8A%A4%ED%83%9D-%EA%B2%B0%EC%A0%95-%EB%A1%9C%EA%B7%B8:-React-vs-Next)** | Coworkers는 사용자 범위가 제한적이고 SEO 중요도가 낮은 서비스로, SSR 기반 이점을 적극적으로 활용하기 어려웠습니다.<br/>실시간에 가까운 상태 변화가 많은 구조 특성상 CSR 흐름이 더 자연스럽다고 판단했습니다.<br/>불필요한 복잡성을 줄이고, 실무자가 보았을 때 설명 비용이 적은 React 단독 구성을 선택했습니다. |
+| **[상태 관리 전략](https://github.com/codeit-Coworkers/coworkers/wiki/%EA%B8%B0%EC%88%A0-%EA%B2%B0%EC%A0%95-%EB%A1%9C%EA%B7%B8:-%EC%83%81%ED%83%9C-%EA%B4%80%EB%A6%AC-%EC%A0%84%EB%9E%B5)**<br/>(TanStack Query + Zustand) | 서버 상태는 비동기 처리·캐싱·에러 관리를 일관되게 다루기 위해 TanStack Query를 선택했습니다.<br/>UI 상호작용이 복잡한 영역에서는 prop drilling과 Context 구조 확장을 방지하기 위해 Zustand를 제한적으로 도입했습니다. |
+| **[Tailwind CSS](https://github.com/codeit-Coworkers/coworkers/wiki/%EA%B8%B0%EC%88%A0-%EC%8A%A4%ED%83%9D-%EA%B2%B0%EC%A0%95-%EB%A1%9C%EA%B7%B8:-CSS-Modules-vs-Tailwind-CSS)** | 클래스 네이밍 고민을 줄이고, 팀원 간 스타일 표현 방식을 자연스럽게 통일하기 위해 Tailwind CSS를 선택했습니다.<br/>컴포넌트 내부에서 스타일을 즉시 확인하며 빠르게 UI를 수정할 수 있어 협업 속도를 높일 수 있다고 판단했습니다. |
+| **[ErrorBoundary / Suspense](https://github.com/codeit-Coworkers/coworkers/wiki/%EC%97%90%EB%9F%AC-%EB%A1%9C%EB%94%A9-%EC%B2%98%EB%A6%AC-%EC%B1%85%EC%9E%84-%EB%B6%84%EB%A6%AC-%EA%B0%80%EC%9D%B4%EB%93%9C%EB%9D%BC%EC%9D%B8)** | 페이지마다 에러·로딩 처리 방식이 달라 전체 화면이 깨지거나 UX가 불균형한 문제가 있어, 책임을 3계층(글로벌·섹션·Mutation)으로 명확히 분리했습니다. |
+| **[HOC (withAuth)](https://github.com/codeit-Coworkers/coworkers/wiki/withAuth-HOC-%E2%80%90-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EB%B3%B4%ED%98%B8-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EA%B0%80%EC%9D%B4%EB%93%9C#2-%EC%99%9C-hoc%EB%A5%BC-%EC%93%B0%EB%8A%94-%EA%B1%B4%EB%8D%B0)** | 보호 페이지마다 로그인 체크 로직을 반복 작성하면 중복·누락·수정 비용이 커지기 때문에, 인증 분기 로직을 HOC 한 곳으로 중앙화했습니다. |

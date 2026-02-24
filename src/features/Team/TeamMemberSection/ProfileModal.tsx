@@ -1,5 +1,6 @@
 import Close from "@/assets/close.svg";
 import UserDefaultProfile from "@/assets/user.svg";
+import { Button } from "@/components/common/Button/Button";
 import { useToastStore } from "@/stores/useToastStore";
 
 type ProfileModalProps = {
@@ -53,16 +54,16 @@ export default function ProfileModal({
             </div>
           </div>
         </div>
-        <button
+        <Button
           type="button"
-          className="bg-brand-primary text-lg-b text-color-inverse h-[48px] w-[280px] rounded-[12px] text-center"
+          size="authWide"
           onClick={() => {
             emailCopyHandler();
             onClose();
           }}
         >
           이메일 복사하기
-        </button>
+        </Button>
       </div>
     </>
   );
