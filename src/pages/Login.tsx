@@ -49,7 +49,7 @@ export default function LoginPage() {
       },
       onError: (error: Error) => {
         setIsLoggingIn(false);
-        toast.show(error.message);
+        toast.showError(error.message);
       },
     });
   };

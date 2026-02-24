@@ -85,7 +85,7 @@ function AddTeamContent() {
             error instanceof HttpError &&
             error.data?.message === "Validation Failed"
           ) {
-            toast.show("팀 이미지를 넣어주세요.");
+            toast.showError("팀 이미지를 넣어주세요.");
           }
         },
       },

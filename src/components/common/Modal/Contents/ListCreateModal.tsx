@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useCreateTaskList } from "@/api/tasklist";
 import { Button } from "../../Button/Button";
 
-
 type ListCreateModalProps = {
   onClose: () => void;
   groupId: number;
@@ -15,12 +14,12 @@ export default function ListCreateModal({
   groupId,
 }: ListCreateModalProps) {
   const [name, setName] = useState("");
-  const { show: showToast } = useToastStore();
+  const { show: showToast, showError: showToastError } = useToastStore();
   const mutation = useCreateTaskList(groupId);
 
   const handleCreate = () => {
     if (!name.trim()) {
-      showToast("목록 이름을 입력해주세요.");
+      showToastError("목록 이름을 입력해주세요.");
       return;
     }
     mutation.mutate(name, {

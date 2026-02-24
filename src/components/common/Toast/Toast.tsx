@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import AlertIcon from "@/assets/alert-white.svg";
 
 /**
@@ -16,6 +17,7 @@ import AlertIcon from "@/assets/alert-white.svg";
  */
 interface ToastProps {
   message: string;
+  type?: "success" | "error";
   actionLabel?: string; // 버튼 텍스트를 유동적으로 변경
   onAction?: () => void; // 필수(onSave)에서 선택(onAction)으로 변경
   onClose: () => void;
@@ -24,6 +26,7 @@ interface ToastProps {
 
 const Toast = ({
   message,
+  type = "success",
   actionLabel = "확인",
   onAction,
   onClose,
@@ -45,10 +48,11 @@ const Toast = ({
   }, [duration, handleClose]);
 
   return (
-    <div
-      className={`bg-brand-primary fixed bottom-8 left-1/2 z-1000 flex -translate-x-1/2 items-center justify-between shadow-lg transition-all duration-300 ease-in-out ${
-        isExiting ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100"
-      } w-[calc(100vw-32px)] max-w-217 rounded-2xl px-3 py-3 sm:w-full sm:px-6 sm:py-4`}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={isExiting ? { opacity: 0, y: 8 } : { opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className={`${type === "error" ? "bg-status-danger" : "bg-brand-primary"} fixed bottom-8 left-1/2 z-1000 flex w-[calc(100vw-32px)] max-w-217 -translate-x-1/2 items-center justify-between rounded-2xl px-3 py-3 shadow-lg sm:w-full sm:px-6 sm:py-4`}
     >
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
         <div className="hidden shrink-0 sm:block">
@@ -65,12 +69,12 @@ const Toast = ({
             e.stopPropagation();
             onAction();
           }}
-          className="hover:bg-opacity-90 bg-background-inverse text-md-sb text-brand-primary ml-4 h-9 w-auto min-w-20 shrink-0 rounded-lg px-3 text-center transition-colors sm:h-10 sm:min-w-25 sm:px-4"
+          className={`hover:bg-opacity-90 bg-background-inverse text-md-sb ml-4 h-9 w-auto min-w-20 shrink-0 rounded-lg px-3 text-center transition-colors sm:h-10 sm:min-w-25 sm:px-4 ${type === "error" ? "text-status-danger" : "text-brand-primary"}`}
         >
           {actionLabel}
         </button>
       )}
-    </div>
+    </motion.div>
   );
 };
 

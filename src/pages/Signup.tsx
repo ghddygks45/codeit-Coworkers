@@ -33,7 +33,7 @@ export default function SignupPage() {
         toast.show("회원가입이 완료되었습니다! 로그인해주세요.");
         navigate("/login");
       },
-      onError: (error: Error) => toast.show(error.message),
+      onError: (error: Error) => toast.showError(error.message),
     });
   };
 

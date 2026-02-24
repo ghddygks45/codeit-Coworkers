@@ -37,7 +37,9 @@ export default function ResetPasswordPage() {
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (!token) {
-      toast.show("유효하지 않은 접근입니다. 메일의 링크를 다시 확인해주세요.");
+      toast.showError(
+        "유효하지 않은 접근입니다. 메일의 링크를 다시 확인해주세요.",
+      );
       return;
     }
 
@@ -57,7 +59,7 @@ export default function ResetPasswordPage() {
       if (error instanceof Error) {
         message = error.message;
       }
-      toast.show(message);
+      toast.showError(message);
     }
   };
 

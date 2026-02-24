@@ -69,7 +69,7 @@ function JoinTeamContent() {
             error instanceof HttpError && error.data?.message
               ? error.data.message
               : "유효하지 않은 팀 링크입니다.";
-          toast.show(message);
+          toast.showError(message);
           setTeamLinkError(message);
         },
       },

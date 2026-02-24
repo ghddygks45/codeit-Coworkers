@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "framer-motion";
 
 /**
  * Modal 컴포넌트 Props
@@ -79,7 +80,7 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  // if (!isOpen) return null;
 
   /** Portal이 마운트될 DOM 노드 */
   const modalRoot = document.getElementById("modalRoot");
@@ -87,19 +88,32 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
   if (!modalRoot) return null;
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 md:items-center"
-      onClick={onClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className={`bg-background-primary flex w-full flex-col items-center rounded-t-[24px] md:w-[384px] md:items-center md:rounded-[24px]`}
-      >
-        <div className="flex w-full flex-col gap-2 text-center">
-          <div className="px-5 py-3">{children}</div>
-        </div>
-      </div>
-    </div>,
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 md:items-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-background-primary flex w-full flex-col items-center rounded-t-[24px] md:w-[384px] md:items-center md:rounded-[24px]"
+          >
+            <div className="flex w-full flex-col gap-2 text-center">
+              <div className="px-5 py-3">{children}</div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+
     modalRoot,
   );
 }

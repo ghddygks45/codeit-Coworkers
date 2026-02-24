@@ -15,7 +15,7 @@ export default function GnbUserProfile() {
   const { isFolded } = useGnbStore();
   const { id: groupId } = useParams();
   const navigate = useNavigate();
-  const { show: showToast } = useToastStore();
+  const { showError: showToast } = useToastStore();
 
   // 로그아웃 상태 관리
   const [isLoggingOut, setIsLoggingOut] = useState(false);

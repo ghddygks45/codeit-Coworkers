@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useToastStore } from "@/stores/useToastStore";
 import Dropdown from "../../Dropdown/Dropdown";
 import { Input } from "../../Input/Input";
 import CalendarDate from "../../Calendar/CalendarDate";
@@ -75,6 +76,7 @@ export default function TaskUpdateModal({
   initialTask,
   isPending = false,
 }: TaskUpdateModalProps) {
+  const { showError } = useToastStore();
   const initialDate = new Date(initialTask.startDate);
 
   const [title, setTitle] = useState(initialTask.title);
@@ -140,7 +142,7 @@ export default function TaskUpdateModal({
 
   const handleSubmit = () => {
     if (!title.trim()) {
-      alert("할 일 제목을 입력해주세요!");
+      showError("할 일 제목을 입력해주세요!");
       return;
     }
 
@@ -157,7 +159,7 @@ export default function TaskUpdateModal({
 
     // 주 반복이면 요일 최소 1개 선택
     if (repeatLabel === "주 반복" && selectedDays.length === 0) {
-      alert("주 반복은 반복 요일을 최소 1개 선택해주세요!");
+      showError("주 반복은 반복 요일을 최소 1개 선택해주세요!");
       return;
     }
 

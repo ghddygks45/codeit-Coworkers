@@ -1,3 +1,5 @@
+import { useToastStore } from "@/stores/useToastStore";
+
 // HTTP 에러를 담는 커스텀 에러 페이지
 
 // → fetch는 4xx, 5xx 응답을 자동으로 throw 하지 않기 때문에,
@@ -56,7 +58,7 @@ export async function fetchClient<T>(
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("tokenExpiry");
-      alert("로그인 세션이 만료되었습니다.");
+      useToastStore.getState().showError("로그인 세션이 만료되었습니다.");
       window.location.href = "/login";
     }
     let errorData = null;

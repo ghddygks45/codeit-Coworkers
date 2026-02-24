@@ -71,9 +71,9 @@ export default function KakaoRedirectPage() {
         console.error("카카오 로그인 실패 상세:", error);
 
         if (error instanceof Error) {
-          toast.show(`로그인 실패: ${error.message}`);
+          toast.showError(`로그인 실패: ${error.message}`);
         } else {
-          toast.show("알 수 없는 이유로 로그인에 실패했습니다.");
+          toast.showError("알 수 없는 이유로 로그인에 실패했습니다.");
         }
 
         navigate("/login");

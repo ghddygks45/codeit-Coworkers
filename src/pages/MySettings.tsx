@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useBlocker } from "react-router-dom";
+import { useToastStore } from "@/stores/useToastStore";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { FetchBoundary } from "@/providers/boundary";
 import { useUser, useUpdateUser } from "@/api/user";
@@ -26,6 +27,7 @@ function MySettingsContent() {
   const isTablet = !isMobile && isTabletOrSmaller;
 
   const { data: user } = useUser();
+  const { showError } = useToastStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const updateUserMutation = useUpdateUser();
   const uploadImageMutation = useUploadImage();
@@ -86,13 +88,14 @@ function MySettingsContent() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
-      alert("이미지 파일은 최대 10MB까지 업로드 가능합니다.");
+      showError("이미지 파일은 최대 10MB까지 업로드 가능합니다.");
       e.target.value = "";
       return;
     }
     uploadImageMutation.mutate(file, {
       onSuccess: (url) => setProfileImageUrl(url),
-      onError: () => alert("이미지 업로드에 실패했습니다. 다시 시도해주세요."),
+      onError: () =>
+        showError("이미지 업로드에 실패했습니다. 다시 시도해주세요."),
     });
     e.target.value = "";
   };

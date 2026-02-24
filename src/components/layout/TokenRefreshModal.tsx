@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { refreshToken } from "@/api/auth";
 import { Button } from "@/components/common/Button/Button";
 import AlertIcon from "@/assets/alert.svg";
+import { useToastStore } from "@/stores/useToastStore";
 
 interface TokenRefreshModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export default function TokenRefreshModal({
 }: TokenRefreshModalProps) {
   const navigate = useNavigate();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { show, showError } = useToastStore();
 
   if (!isOpen) return null;
 
@@ -22,7 +24,7 @@ export default function TokenRefreshModal({
     const storedRefreshToken = localStorage.getItem("refreshToken");
 
     if (!storedRefreshToken) {
-      alert("로그인 세션이 만료되었습니다. 다시 로그인해주세요.");
+      showError("로그인 세션이 만료되었습니다. 다시 로그인해주세요.");
       navigate("/Login");
       return;
     }
@@ -32,7 +34,7 @@ export default function TokenRefreshModal({
       const { accessToken } = await refreshToken(storedRefreshToken);
 
       localStorage.setItem("accessToken", accessToken);
-      alert("로그인이 연장되었습니다.");
+      show("로그인이 연장되었습니다.");
 
       onClose();
     } catch (error) {
@@ -40,7 +42,7 @@ export default function TokenRefreshModal({
         error instanceof Error
           ? error.message
           : "알 수 없는 오류가 발생했습니다.";
-      alert(errorMessage);
+      showError(errorMessage);
       localStorage.clear();
       navigate("/Login");
     } finally {

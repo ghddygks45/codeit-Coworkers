@@ -49,14 +49,14 @@ export default function ImageUpload({
 
     // 10MB 제한 확인
     if (file.size > 10 * 1024 * 1024) {
-      toast.show("이미지 파일은 최대 10MB까지 업로드 가능합니다.");
+      toast.showError("이미지 파일은 최대 10MB까지 업로드 가능합니다.");
       return;
     }
 
     mutate(file, {
       onSuccess: (url) => onImageChange?.(url),
       onError: () =>
-        toast.show("이미지 업로드에 실패했습니다. 다시 시도해주세요."),
+        toast.showError("이미지 업로드에 실패했습니다. 다시 시도해주세요."),
       onSettled: () => {
         if (fileInputRef.current) {
           fileInputRef.current.value = "";

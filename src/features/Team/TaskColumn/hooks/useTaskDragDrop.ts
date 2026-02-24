@@ -40,7 +40,7 @@ export function useTaskDragDrop({ groupId, taskLists }: UseTaskDragDropParams) {
   const { mutate: updateTaskList } = useUpdateTaskList(groupId);
   const { mutate: updateTaskDone } = useUpdateTask(groupId);
   const { mutateAsync: orderTaskListAsync } = useOrderTaskList(groupId);
-  const { show: showToast } = useToastStore();
+  const { showError: showToast } = useToastStore();
 
   // [1] 드래그 시작 함수
   const handleDragStart = (id: number, from: KanbanStatus) => {

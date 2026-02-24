@@ -44,7 +44,7 @@ export default function ForgotPasswordModal({
       if (error instanceof Error) {
         message = error.message;
       }
-      toast.show(message);
+      toast.showError(message);
     }
   };
 
