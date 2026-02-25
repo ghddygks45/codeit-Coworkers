@@ -15,7 +15,7 @@ export interface TaskData {
   groupId: string | number;
   repeatLabel: string;
   isRecurring: boolean;
-  selectedDays?: string[]; // ✅ 주 반복용 (예: ["월","수"])
+  selectedDays?: string[];
 }
 
 interface TaskCreateModalProps {
@@ -152,7 +152,7 @@ export default function TaskCreateModal({
 
   return (
     <div ref={modalRef} tabIndex={-1} className="outline-none">
-      <div className="flex flex-col">
+      <div className="m-2 flex flex-col">
         <div className="relative mb-5 flex items-center justify-center">
           <h2 className="text-2lg-b text-color-primary font-bold">
             할 일 만들기
@@ -196,7 +196,7 @@ export default function TaskCreateModal({
                 placeholder={dateString}
               />
               {isDateOpen && (
-                <div className="bg-background-primary ring-brand-primary absolute top-14 left-0 z-99 flex w-100 justify-center rounded-xl pb-2 shadow-2xl ring-1">
+                <div className="bg-background-primary ring-brand-primary absolute top-14 left-0 z-99 flex w-76 justify-center rounded-xl pb-2 shadow-2xl ring-1 md:w-81">
                   <CalendarDate
                     selectedDate={date}
                     onSelectDate={(d) => {
@@ -216,7 +216,7 @@ export default function TaskCreateModal({
                 placeholder="시간 선택"
               />
               {isTimeOpen && (
-                <div className="bg-background-primary ring-brand-primary absolute top-14 right-0 z-99 flex w-100 justify-center rounded-xl p-4 shadow-2xl ring-1">
+                <div className="bg-background-primary ring-brand-primary absolute top-14 right-0 z-99 flex w-76 justify-center rounded-xl p-4 shadow-2xl ring-1 md:w-81">
                   <CalendarTime
                     selectedTime={time}
                     onSelectTime={(t) => {
@@ -246,7 +246,7 @@ export default function TaskCreateModal({
           </div>
         </div>
 
-        {/* ✅ 주 반복일 때만 요일 선택 */}
+        {/* 주 반복일 때만 요일 선택 */}
         {repeatLabel === "주 반복" && (
           <div className="mb-5 flex flex-col gap-2">
             <label className="text-md-sb text-color-primary font-bold">
@@ -258,7 +258,7 @@ export default function TaskCreateModal({
                   key={item}
                   tabIndex={0}
                   onClick={() => toggleDay(item)}
-                  className={`text-sm-m flex h-11 w-12 cursor-pointer items-center justify-center rounded-xl border transition-all ${
+                  className={`text-sm-m mx-0.5 flex h-11 w-12 cursor-pointer items-center justify-center rounded-xl border transition-all ${
                     selectedDays.includes(item)
                       ? "bg-brand-primary border-brand-primary text-white"
                       : "text-color-primary border-border-primary hover:bg-background-secondary"
@@ -274,7 +274,7 @@ export default function TaskCreateModal({
         {/* 월 반복은 서버가 monthDay(1~31)를 요구할 가능성이 높아서,
             UI에서 따로 “반복 일”을 받지 않아도, 선택한 날짜의 getDate()로 서버에 보냄 */}
 
-        <div className="mb-10 flex flex-col gap-2 text-left">
+        <div className="mb-3 flex flex-col gap-2 text-left">
           <label className="text-md-sb text-color-primary font-bold">
             할 일 메모
           </label>

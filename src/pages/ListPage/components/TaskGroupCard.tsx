@@ -1,7 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import KebabIcon from "@/assets/kebab.svg";
 import Loading from "@/assets/progress-ongoing.svg";
 import LoadingDone from "@/assets/progress-done.svg";
+
+import Dropdown, { Option } from "@/components/common/Dropdown/Dropdown";
 
 type Status = "done" | "ongoing" | "loading";
 
@@ -17,6 +19,8 @@ interface TaskGroupCardProps {
 
   isActive?: boolean;
   onClick?: () => void;
+
+  // 부모에서 모달 띄우도록 콜백만 호출
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -31,21 +35,22 @@ export const TaskGroupCard = ({
   onEdit,
   onDelete,
 }: TaskGroupCardProps) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   const countText =
     current === null || total === null ? "—/—" : `${current}/${total}`;
+
+  // action에 이벤트가 없어서, 여기서는 "카드 클릭 방지"를 trigger 쪽에서 처리해줄게
+  const menuOptions: Option[] = [
+    {
+      label: "수정하기",
+      value: "edit",
+      action: () => onEdit?.(),
+    },
+    {
+      label: "삭제하기",
+      value: "delete",
+      action: () => onDelete?.(),
+    },
+  ];
 
   return (
     <div
@@ -65,7 +70,7 @@ export const TaskGroupCard = ({
       </span>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* ✅ 아이콘이 0/0 앞쪽에 오도록 한 덩어리로 */}
+        {/* 아이콘이 0/0 앞쪽에 오도록 한 덩어리로 */}
         <div className="flex items-center gap-1.5">
           {status === "done" ? (
             <LoadingDone className="h-4 w-4" />
@@ -81,43 +86,24 @@ export const TaskGroupCard = ({
           </span>
         </div>
 
-        <div className="relative" ref={menuRef}>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMenuOpen(!isMenuOpen);
-            }}
-            className="hover:bg-background-secondary rounded-md p-1 transition-colors"
-            aria-label="목록 메뉴"
-          >
-            <KebabIcon className="text-icon-primary h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </button>
-
-          {isMenuOpen && (
-            <div className="border-border-primary absolute right-0 z-50 mt-2 w-24 overflow-hidden rounded-lg border bg-white shadow-lg sm:w-28">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit?.();
-                  setIsMenuOpen(false);
-                }}
-                className="text-sm-m text-color-primary hover:bg-background-secondary sm:text-md-m w-full px-4 py-2 text-left transition-colors"
-              >
-                수정하기
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete?.();
-                  setIsMenuOpen(false);
-                }}
-                className="text-sm-m sm:text-md-m w-full px-4 py-2 text-left text-red-500 transition-colors hover:bg-red-50"
-              >
-                삭제하기
-              </button>
-            </div>
-          )}
-        </div>
+        {/* 케밥 메뉴: 공통 Dropdown */}
+        <Dropdown
+          trigger="kebab"
+          listAlign="center"
+          icon={
+            <button
+              type="button"
+              className="hover:bg-background-secondary rounded-full p-1 transition-colors"
+              aria-label="목록 메뉴"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <KebabIcon className="text-icon-primary h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </button>
+          }
+          options={menuOptions}
+          listClassName="overflow-hidden border border-border-primary bg-white shadow-lg"
+          usePortal
+        />
       </div>
     </div>
   );

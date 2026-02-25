@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import {
   useMutation,
@@ -12,23 +18,26 @@ import { BASE_URL } from "@/api/config";
 
 import Modal from "@/components/common/Modal/Modal";
 import ListCreateModal from "@/components/common/Modal/Contents/ListCreateModal";
+import ListEditModal from "@/components/common/Modal/Contents/ListEditModal";
+import ListDeleteModal from "@/components/common/Modal/Contents/ListDeleteModal";
 import TaskCreateModal, {
   TaskData,
 } from "@/components/common/Modal/Contents/TaskCreateModal";
+import TaskDangerModal from "@/components/common/Modal/Contents/TaskDeleteModal";
+
 import { WeeklyCalendar } from "./components/WeeklyCalendar";
 import DatePagination from "./components/DatePagination";
 import CalendarPicker from "./components/CalendarPicker";
 import TaskCard from "./components/TaskCard";
 import { TaskGroupCard } from "./components/TaskGroupCard";
+import TeamHeader from "@/features/common/components/TeamHeader";
+import Dropdown, { Option } from "@/components/common/Dropdown/Dropdown";
 
 import PlusIcon from "@/assets/plus_blue.svg";
-import SettingsIcon from "@/assets/settings.svg";
 import ArrowDown from "@/assets/arrow-down.svg";
 import Loading from "@/assets/progress-ongoing.svg";
 import LoadingDone from "@/assets/progress-done.svg";
 
-import { useGroups } from "@/api/user";
-import { useDeleteTaskList } from "@/api/tasklist";
 import {
   getTasks,
   createTask,
@@ -38,7 +47,8 @@ import {
 } from "@/api/task";
 import { useToastStore } from "@/stores/useToastStore";
 import { TaskServer } from "@/types/task";
-import { GroupSummaryServer } from "@/types/group";
+
+type RepeatType = "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
 
 // --- 타입 정의 ---
 interface TaskListResponse {
@@ -51,6 +61,7 @@ interface TaskListResponse {
 interface UITask extends Omit<TaskServer, "name"> {
   title: string;
   isCompleted: boolean;
+  weekDays?: number[];
 }
 
 interface GroupDetailResponse {
@@ -69,14 +80,18 @@ const formatDateToYYYYMMDD = (date: Date): string => {
 };
 
 const KOREAN_WEEKDAY_TO_JS: Record<string, number> = {
-  일: 0,
-  월: 1,
-  화: 2,
-  수: 3,
-  목: 4,
-  금: 5,
-  토: 6,
+  월: 0,
+  화: 1,
+  수: 2,
+  목: 3,
+  금: 4,
+  토: 5,
+  일: 6,
 };
+
+// {status:doing} 제거
+const cleanName = (name?: string | null) =>
+  (name ?? "").replace("{status:doing}", "").trim();
 
 export default function ListPage() {
   const queryClient = useQueryClient();
@@ -95,30 +110,39 @@ export default function ListPage() {
   const selectedTeamId = Number(teamId);
   const urlListId = listId ? Number(listId) : null;
 
+  // 현재 열려있는 상세 taskId (있으면 number)
+  const openedTaskId = taskId ? Number(taskId) : null;
+
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showCalendar, setShowCalendar] = useState<boolean>(false);
   const [isListModalOpen, setIsListModalOpen] = useState<boolean>(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState<boolean>(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userSelectedListId, setUserSelectedListId] = useState<number | null>(
     null,
   );
 
-  // 삭제 선택 모달 상태
+  // 목록 수정/삭제 모달 상태 + 선택된 목록
+  const [isListEditModalOpen, setIsListEditModalOpen] = useState(false);
+  const [isListDeleteModalOpen, setIsListDeleteModalOpen] = useState(false);
+  const [selectedTaskList, setSelectedTaskList] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+
+  // 삭제 선택 모달 상태 (할 일 삭제)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<UITask | null>(null);
 
-  // 그룹 설정 드롭다운
-  const [isTeamMenuOpen, setIsTeamMenuOpen] = useState(false);
-
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
-  const teamMenuRef = useRef<HTMLDivElement>(null);
 
-  // 유저 팀 목록 정보
-  const { data: groups = [] } = useGroups();
-  const currentTeam = groups.find(
-    (group: GroupSummaryServer) => group.id === selectedTeamId,
+  // 삭제한 task가 현재 상세패널에 열려있다면 닫기
+  const closeDetailIfOpenedTaskDeleted = useCallback(
+    (deletedId: number) => {
+      if (openedTaskId && openedTaskId === deletedId) {
+        closePanel();
+      }
+    },
+    [openedTaskId, closePanel],
   );
 
   // 그룹 할 일 목록 조회
@@ -161,8 +185,8 @@ export default function ListPage() {
     staleTime: 1000 * 60,
   });
 
-  // ✅ (요구사항 2) 데스크탑에서 0/0이 “클릭해야 바뀌는 문제” 해결:
-  // 각 리스트별로 현재 날짜(dateParam)의 tasks를 미리 조회해서 count를 만든다.
+  // 데스크탑에서 0/0이 “클릭해야 바뀌는 문제” 해결:
+  // 각 리스트별로 현재 날짜(dateParam)의 tasks를 미리 조회해서 count를 만듬.
   const listCountQueries = useQueries({
     queries: (taskGroups ?? []).map((g) => ({
       queryKey: ["tasks", g.id, dateParam],
@@ -189,7 +213,7 @@ export default function ListPage() {
     return map;
   }, [taskGroups, listCountQueries]);
 
-  // ✅ 0/0 “눌러야 반영” 느낌 방지: 로딩 중엔 —/— 표시 (현재 선택 리스트용)
+  // 0/0 “눌러야 반영” 느낌 방지: 로딩 중엔 —/— 표시 (현재 선택 리스트용)
   const currentCount = isTasksLoading
     ? null
     : tasks.filter((t) => t.isCompleted).length;
@@ -213,6 +237,11 @@ export default function ListPage() {
       queryClient.invalidateQueries({
         queryKey: ["taskLists", selectedTeamId],
       });
+
+      queryClient.invalidateQueries({
+        queryKey: ["group", selectedTeamId],
+      });
+
       showToast("할 일이 추가되었습니다.");
       setIsTaskModalOpen(false);
     },
@@ -234,9 +263,31 @@ export default function ListPage() {
     },
   });
 
-  // 단일 할 일 삭제 (dateParam 포함 invalidate)
-  const deleteTaskMutation = useMutation({
-    mutationFn: (id: number) => deleteTask(selectedTeamId, currentListId!, id),
+  // TaskUpdateModal에서 "수정하기" 눌렀을 때 업데이트
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({
+      taskId: targetTaskId,
+      body,
+    }: {
+      taskId: number;
+      body: {
+        name: string;
+        description: string;
+        startDate: string;
+        frequencyType: RepeatType;
+        weekDays: number[];
+        monthDay: number;
+        isRecurring: boolean;
+      };
+    }) => {
+      // updateTask의 바디 타입이 프로젝트마다 다를 수 있어서 안전하게 캐스팅
+      return updateTask(
+        selectedTeamId,
+        currentListId!,
+        targetTaskId,
+        body as unknown as Record<string, unknown>,
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["tasks", currentListId, dateParam],
@@ -244,10 +295,32 @@ export default function ListPage() {
       queryClient.invalidateQueries({
         queryKey: ["taskLists", selectedTeamId],
       });
-      showToast("할 일이 삭제되었습니다.");
+      showToast("성공적으로 수정 되었습니다.");
     },
     onError: () => {
-      showToast("할 일 삭제에 실패했습니다.");
+      showToast("수정에 실패했습니다.");
+    },
+  });
+
+  // 단일 할 일 삭제 (dateParam 포함 invalidate)
+  const deleteTaskMutation = useMutation({
+    mutationFn: (id: number) => deleteTask(selectedTeamId, currentListId!, id),
+    onSuccess: (_, deletedId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["tasks", currentListId, dateParam],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["taskLists", selectedTeamId],
+      });
+      // 성공 토스트
+      showToast("성공적으로 삭제 되었습니다.");
+      closeDeleteModal();
+      closeDetailIfOpenedTaskDeleted(deletedId);
+    },
+    onError: () => {
+      // 실패 토스트
+      showToast("삭제에 실패했습니다.");
+      // 실패 시 모달/상세패널 유지 (아무것도 닫지 않음)
     },
   });
 
@@ -267,43 +340,50 @@ export default function ListPage() {
         { method: "DELETE" },
       );
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["tasks", currentListId, dateParam],
       });
       queryClient.invalidateQueries({
         queryKey: ["taskLists", selectedTeamId],
       });
-      showToast("반복 할 일이 전체 삭제되었습니다.");
+
+      // 성공 토스트 문구
+      showToast("성공적으로 삭제 되었습니다.");
+      // 성공시에만 삭제 선택 모달 닫기
+      closeDeleteModal();
+      closeDetailIfOpenedTaskDeleted(variables.taskId);
     },
     onError: () => {
-      showToast("반복 할 일 삭제에 실패했습니다.");
-    },
-  });
-
-  const { mutate: deleteList } = useDeleteTaskList(selectedTeamId);
-
-  // ✅ 그룹 삭제
-  const deleteGroupMutation = useMutation({
-    mutationFn: async () => {
-      await fetchClient<void>(`${BASE_URL}/groups/${selectedTeamId}`, {
-        method: "DELETE",
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["groups"] });
-      showToast("그룹이 삭제되었습니다.");
-      navigate("/");
-    },
-    onError: () => {
-      showToast("그룹 삭제에 실패했습니다.");
+      showToast("삭제에 실패했습니다.");
+      // 실패 시 모달/상세패널 유지
     },
   });
 
   // --- Handlers ---
-  const handleSelectList = (id: number) => {
-    setUserSelectedListId(id);
-    navigate(`/team/${teamId}/tasklists/${id}`);
+  const handleSelectList = useCallback(
+    (id: number) => {
+      setUserSelectedListId(id);
+      navigate(`/team/${teamId}/tasklists/${id}`);
+    },
+    [navigate, teamId],
+  );
+
+  // 목록 수정/삭제 모달 open/close
+  const openListEditModal = (group: TaskListResponse) => {
+    setSelectedTaskList({ id: group.id, name: group.name });
+    setIsListEditModalOpen(true);
+  };
+
+  const openListDeleteModal = (group: TaskListResponse) => {
+    setSelectedTaskList({ id: group.id, name: group.name });
+    setIsListDeleteModalOpen(true);
+  };
+
+  const closeListModals = () => {
+    setIsListEditModalOpen(false);
+    setIsListDeleteModalOpen(false);
+    setSelectedTaskList(null);
   };
 
   const handleCreateTask = (data: TaskData) => {
@@ -383,14 +463,7 @@ export default function ListPage() {
     });
   };
 
-  const handleDeleteList = (targetListId: number) => {
-    if (confirm("정말 이 목록을 삭제하시겠습니까?")) {
-      deleteList(targetListId);
-      setUserSelectedListId(null);
-    }
-  };
-
-  // 삭제 선택 모달 열기/닫기
+  // 삭제 선택 모달(할 일) 열기/닫기
   const openDeleteModal = (task: UITask) => {
     setDeleteTarget(task);
     setIsDeleteModalOpen(true);
@@ -404,7 +477,6 @@ export default function ListPage() {
   const handleDeleteOnlyThis = () => {
     if (!deleteTarget) return;
     deleteTaskMutation.mutate(deleteTarget.id);
-    closeDeleteModal();
   };
 
   const handleDeleteAllRecurring = () => {
@@ -414,20 +486,14 @@ export default function ListPage() {
       taskId: deleteTarget.id,
       recurringId: deleteTarget.recurringId,
     });
-    closeDeleteModal();
   };
 
-  // 바깥 클릭 닫기 (드롭다운/캘린더/그룹메뉴)
+  // 바깥 클릭 닫기 (캘린더만)
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
-
-      if (dropdownRef.current && !dropdownRef.current.contains(target))
-        setIsDropdownOpen(false);
       if (calendarRef.current && !calendarRef.current.contains(target))
         setShowCalendar(false);
-      if (teamMenuRef.current && !teamMenuRef.current.contains(target))
-        setIsTeamMenuOpen(false);
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -442,7 +508,6 @@ export default function ListPage() {
     tasks: [],
   };
 
-  // ✅ (요구사항 1 보조) 패널이 닫힐 때도 한 번 더 안전하게 갱신
   useEffect(() => {
     if (!isOpen && currentListId) {
       queryClient.invalidateQueries({
@@ -479,62 +544,28 @@ export default function ListPage() {
     };
   }, [isOpen]);
 
+  // 모바일 리스트 Dropdown 옵션
+  const mobileListOptions: Option[] = useMemo(
+    () =>
+      (taskGroups ?? []).map((group) => ({
+        label: cleanName(group.name),
+        value: String(group.id),
+        action: () => handleSelectList(group.id),
+      })),
+    [taskGroups, handleSelectList],
+  );
+
   return (
     <div className="bg-background-secondary font-pretendard flex min-h-screen flex-col lg:flex-row">
       <main
         className={[
           "text-color-primary flex-1 p-4 md:p-6 lg:p-10",
           "transition-[margin] duration-300 ease-out",
-          isOpen ? "lg:mr-160" : "",
+          isOpen ? "lg:mr-130" : "",
         ].join(" ")}
       >
-        <div className="mx-auto max-w-full space-y-6 lg:max-w-300">
-          <header className="lg:border-border-primary lg:bg-background-inverse text-2xl-b mb-6 flex items-center rounded-xl py-3 md:mb-12 md:py-4 lg:justify-between lg:border lg:px-4 lg:shadow-sm">
-            <h1 className="md:text-2xl-b text-xl font-bold">
-              {currentTeam ? currentTeam.name : "할 일 목록"}
-            </h1>
-
-            {/* ✅ 그룹 설정 드롭다운 */}
-            <div className="relative" ref={teamMenuRef}>
-              <button
-                type="button"
-                onClick={() => setIsTeamMenuOpen((v) => !v)}
-                className="active:scale-95"
-                aria-label="그룹 설정"
-              >
-                <SettingsIcon className="text-icon-primary ml-2.5 h-5 w-5 cursor-pointer" />
-              </button>
-
-              {isTeamMenuOpen && (
-                <div className="border-border-primary absolute top-8 right-0 z-80 w-44 overflow-hidden rounded-xl border bg-white shadow-xl">
-                  <button
-                    type="button"
-                    className="text-color-primary hover:bg-background-secondary w-full px-4 py-3 text-left text-sm"
-                    onClick={() => {
-                      setIsTeamMenuOpen(false);
-                      navigate(`/team/${teamId}/edit`);
-                    }}
-                  >
-                    그룹 수정하기
-                  </button>
-
-                  <button
-                    type="button"
-                    className="hover:bg-background-secondary w-full px-4 py-3 text-left text-sm text-red-500 disabled:opacity-50"
-                    onClick={() => {
-                      setIsTeamMenuOpen(false);
-                      if (confirm("정말 이 그룹을 삭제하시겠습니까?")) {
-                        deleteGroupMutation.mutate();
-                      }
-                    }}
-                    disabled={deleteGroupMutation.isPending}
-                  >
-                    그룹 삭제하기
-                  </button>
-                </div>
-              )}
-            </div>
-          </header>
+        <div className="relative mx-auto max-w-full space-y-6 overflow-visible lg:max-w-300">
+          <TeamHeader groupId={Number(teamId ?? 0)} />
 
           <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
             <aside className="flex w-full shrink-0 flex-col lg:w-72">
@@ -543,64 +574,46 @@ export default function ListPage() {
                   할 일
                 </h2>
 
-                {/* 모바일 뷰 드롭다운 */}
+                {/* 모바일 뷰 드롭다운 (공통 Dropdown으로 교체) */}
                 <div className="flex items-center justify-between gap-2 lg:hidden">
-                  <div className="relative min-w-0 flex-1" ref={dropdownRef}>
-                    <button
-                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="border-border-primary flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 shadow-sm active:scale-95"
-                    >
-                      <div className="flex min-w-0 items-center gap-2">
-                        <span className="text-color-primary text-sm-sb wrap-break-word whitespace-normal">
-                          {activeGroup.name}
-                        </span>
+                  <div className="min-w-0 flex-1">
+                    <Dropdown
+                      trigger="kebabSmall"
+                      icon={
+                        <button
+                          type="button"
+                          className="border-border-primary flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 shadow-sm active:scale-95"
+                        >
+                          <div className="flex min-w-0 items-center gap-2">
+                            <span className="text-color-primary text-sm-sb wrap-break-word whitespace-normal">
+                              {activeGroup.name}
+                            </span>
 
-                        {/* ✅ 모바일: 아이콘 + 카운트 */}
-                        <div className="flex items-center gap-1.5">
-                          {currentCount === null || totalCount === null ? (
-                            // 로딩 중 자리 유지
-                            <span className="inline-block h-4 w-4" />
-                          ) : isAllDone ? (
-                            <LoadingDone className="h-4 w-4" />
-                          ) : (
-                            <Loading className="h-4 w-4" />
-                          )}
+                            {/* 모바일: 아이콘 + 카운트 */}
+                            <div className="flex items-center gap-1.5">
+                              {currentCount === null || totalCount === null ? (
+                                <span className="inline-block h-4 w-4" />
+                              ) : isAllDone ? (
+                                <LoadingDone className="h-4 w-4" />
+                              ) : (
+                                <Loading className="h-4 w-4" />
+                              )}
 
-                          <span className="text-brand-primary text-md-r">
-                            {currentCount === null || totalCount === null
-                              ? "—/—"
-                              : `${currentCount}/${totalCount}`}
-                          </span>
-                        </div>
-                      </div>
+                              <span className="text-brand-primary text-md-r">
+                                {currentCount === null || totalCount === null
+                                  ? "—/—"
+                                  : `${currentCount}/${totalCount}`}
+                              </span>
+                            </div>
+                          </div>
 
-                      <ArrowDown
-                        className={`text-icon-primary h-4 w-4 transition-transform ${
-                          isDropdownOpen ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
-
-                    {isDropdownOpen && (
-                      <ul className="border-border-primary absolute z-70 mt-2 w-full overflow-hidden rounded-xl border bg-white shadow-2xl">
-                        {taskGroups.map((group: TaskListResponse) => (
-                          <li
-                            key={group.id}
-                            onClick={() => {
-                              handleSelectList(group.id);
-                              setIsDropdownOpen(false);
-                            }}
-                            className={`hover:bg-background-secondary cursor-pointer px-4 py-3 text-sm transition-colors ${
-                              currentListId === group.id
-                                ? "text-brand-primary bg-blue-50 font-bold"
-                                : "text-color-primary"
-                            }`}
-                          >
-                            {group.name}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                          <ArrowDown className="text-icon-primary h-4 w-4" />
+                        </button>
+                      }
+                      options={mobileListOptions}
+                      listClassName="w-full overflow-hidden rounded-xl border border-border-primary bg-white shadow-2xl"
+                      usePortal
+                    />
                   </div>
 
                   <button
@@ -623,7 +636,7 @@ export default function ListPage() {
                       return (
                         <TaskGroupCard
                           key={group.id}
-                          name={group.name}
+                          name={cleanName(group.name)}
                           current={counts ? counts.current : null}
                           total={counts ? counts.total : null}
                           status={
@@ -635,7 +648,9 @@ export default function ListPage() {
                           }
                           isActive={isActive}
                           onClick={() => handleSelectList(group.id)}
-                          onDelete={() => handleDeleteList(group.id)}
+                          // 드롭다운 “수정/삭제” → 모달 오픈
+                          onEdit={() => openListEditModal(group)}
+                          onDelete={() => openListDeleteModal(group)}
                         />
                       );
                     })
@@ -660,7 +675,7 @@ export default function ListPage() {
               <div className="mx-auto max-w-full space-y-8 lg:max-w-3xl">
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                   <h3 className="md:text-2xl-b text-color-tertiary text-xl font-bold">
-                    {activeGroup.name}
+                    {cleanName(activeGroup.name)}
                   </h3>
 
                   <div className="flex items-center gap-1 self-end md:self-auto">
@@ -679,7 +694,7 @@ export default function ListPage() {
                     />
                     <div
                       ref={calendarRef}
-                      className="bg-background-inverse relative z-60"
+                      className="bg-background-inverse relative z-10"
                     >
                       <CalendarPicker
                         selectedDate={selectedDate}
@@ -756,6 +771,35 @@ export default function ListPage() {
                             })
                           }
                           onDelete={() => openDeleteModal(task)}
+                          // TaskCard 내부에서 수정 모달을 띄우는 방식: updateModalProps만 넘기면 됨
+                          updateModalProps={{
+                            initialTask: {
+                              id: task.id,
+                              title: task.title,
+                              description: task.description ?? "",
+                              startDate:
+                                task.startDate ??
+                                new Date(task.date).toISOString(), // null이면 대체
+                              frequencyType: (task.frequency ??
+                                "ONCE") as RepeatType,
+                              weekDays: task.weekDays ?? [],
+                            },
+                            onUpdate: (data) => {
+                              updateTaskMutation.mutate({
+                                taskId: task.id,
+                                body: {
+                                  name: data.title,
+                                  description: data.description,
+                                  startDate: data.startDate,
+                                  frequencyType: data.frequencyType,
+                                  weekDays: data.weekDays,
+                                  monthDay: data.monthDay,
+                                  isRecurring: data.isRecurring,
+                                },
+                              });
+                            },
+                            isPending: updateTaskMutation.isPending,
+                          }}
                         />
                       </div>
                     ))
@@ -793,15 +837,15 @@ export default function ListPage() {
       {/* 오른쪽 슬라이드 패널 */}
       <aside
         className={[
-          "fixed right-0 z-50 bg-white shadow-xl",
+          "fixed right-0 z-30 bg-white shadow-xl",
           "transition-transform duration-300 ease-out",
           isOpen ? "translate-x-0" : "translate-x-full",
           "top-13 left-0 h-[calc(100dvh-52px)] w-full",
           "md:top-0 md:left-auto md:h-dvh md:w-130",
-          "lg:w-160",
+          "lg:w-130",
         ].join(" ")}
       >
-        <div className="h-full overflow-auto px-4 py-4 md:px-6 md:py-6 lg:pr-10">
+        <div className="h-full overflow-auto">
           <Outlet />
         </div>
       </aside>
@@ -811,6 +855,24 @@ export default function ListPage() {
         <ListCreateModal
           groupId={selectedTeamId}
           onClose={() => setIsListModalOpen(false)}
+        />
+      </Modal>
+
+      {/* 리스트 수정 모달 */}
+      <Modal isOpen={isListEditModalOpen} onClose={closeListModals}>
+        <ListEditModal
+          groupId={selectedTeamId}
+          selectedTaskList={selectedTaskList}
+          onClose={closeListModals}
+        />
+      </Modal>
+
+      {/* 리스트 삭제 모달 */}
+      <Modal isOpen={isListDeleteModalOpen} onClose={closeListModals}>
+        <ListDeleteModal
+          groupId={selectedTeamId}
+          selectedTaskList={selectedTaskList}
+          onClose={closeListModals}
         />
       </Modal>
 
@@ -826,45 +888,15 @@ export default function ListPage() {
 
       {/* 삭제 선택 모달 */}
       <Modal isOpen={isDeleteModalOpen} onClose={closeDeleteModal}>
-        <div className="font-pretendard w-[320px] rounded-2xl bg-white p-6">
-          <h3 className="text-color-primary text-lg font-bold">할 일 삭제</h3>
-
-          <p className="text-color-tertiary mt-2 text-sm">
-            {deleteTarget?.frequency !== "ONCE"
-              ? "반복 할 일입니다. 삭제 범위를 선택해주세요."
-              : "이 할 일을 삭제할까요?"}
-          </p>
-
-          <div className="mt-5 flex flex-col gap-2">
-            <button
-              type="button"
-              className="w-full rounded-xl bg-red-500 py-3 font-semibold text-white active:scale-95 disabled:opacity-50"
-              onClick={handleDeleteOnlyThis}
-              disabled={deleteTaskMutation.isPending}
-            >
-              이번 일정만 삭제
-            </button>
-
-            {deleteTarget?.frequency !== "ONCE" && (
-              <button
-                type="button"
-                className="w-full rounded-xl border border-red-500 py-3 font-semibold text-red-500 active:scale-95 disabled:opacity-50"
-                onClick={handleDeleteAllRecurring}
-                disabled={deleteRecurringMutation.isPending}
-              >
-                반복 전체 삭제
-              </button>
-            )}
-
-            <button
-              type="button"
-              className="mt-1 w-full rounded-xl bg-gray-100 py-3 font-semibold text-gray-700 active:scale-95"
-              onClick={closeDeleteModal}
-            >
-              취소
-            </button>
-          </div>
-        </div>
+        <TaskDangerModal
+          onClose={closeDeleteModal}
+          // 반복 할 일이 아닌 경우(ONCE)는 이 버튼만 쓰게 됨
+          onDelete={handleDeleteOnlyThis}
+          // 반복 할 일인 경우(weekly/monthly/daily) 선택 버튼 노출
+          onDeleteOnlyThis={handleDeleteOnlyThis}
+          onDeleteAllRecurring={handleDeleteAllRecurring}
+          isRecurring={deleteTarget?.frequency !== "ONCE"}
+        />
       </Modal>
     </div>
   );

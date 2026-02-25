@@ -41,7 +41,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
     d1.getMonth() === d2.getMonth() &&
     d1.getDate() === d2.getDate();
 
-  // ✅ 스와이프용 ref
+  // 스와이프용 ref
   const startXRef = useRef<number | null>(null);
   const pointerIdRef = useRef<number | null>(null);
   const THRESHOLD = 60; // px
@@ -57,7 +57,7 @@ export const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 
     const dx = e.clientX - startXRef.current;
 
-    // ✅ 왼쪽으로 밀면 다음 주 / 오른쪽으로 밀면 이전 주
+    // 왼쪽으로 밀면 다음 주 / 오른쪽으로 밀면 이전 주
     if (dx <= -THRESHOLD) onNextWeek();
     else if (dx >= THRESHOLD) onPrevWeek();
 

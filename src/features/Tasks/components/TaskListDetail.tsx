@@ -28,6 +28,8 @@ import TaskUpdateModal from "@/components/common/Modal/Contents/TaskUpdateModal"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateTask } from "@/api/task";
 import { useUpdateRecurring } from "@/api/recurring";
+import { fetchClient } from "@/lib/fetchClient";
+import { BASE_URL } from "@/api/config";
 
 /**
  * 특정 시간(createdAt)이 현재로부터 며칠 전인지 계산합니다.
@@ -173,6 +175,31 @@ export default function TaskListDetail() {
       },
     });
   };
+
+  /**
+   * 반복 전체 삭제 mutation
+   * - 반복(Recurring) 할 일일 경우 "전체 삭제" 선택을 위해 추가합니다.
+   * - ListPage에서 사용하던 endpoint와 동일한 방식으로 호출합니다.
+   */
+  const deleteRecurringAllMutation = useMutation({
+    mutationFn: async () => {
+      const recurringId = taskData?.recurringId;
+      if (!recurringId) throw new Error("recurringId is missing");
+
+      await fetchClient<void>(
+        `${BASE_URL}/groups/${groupIdNum}/task-lists/${listIdNum}/tasks/${taskIdNum}/recurring/${recurringId}`,
+        { method: "DELETE" },
+      );
+    },
+    onSuccess: () => {
+      invalidateListPage();
+      closeModal();
+      navigate(`/team/${teamId}/tasklists/${listId}`);
+    },
+    onError: () => {
+      closeModal();
+    },
+  });
 
   /** 댓글 목록 데이터 */
   const { data: commentData } = useGetTaskComment(taskIdNum);
@@ -526,6 +553,13 @@ export default function TaskListDetail() {
           <TaskDangerModal
             onClose={closeModal}
             onDelete={handleConfirmTaskDelete}
+            isRecurring={Boolean(taskData?.recurringId)}
+            onDeleteOnlyThis={handleConfirmTaskDelete}
+            onDeleteAllRecurring={
+              taskData?.recurringId
+                ? () => deleteRecurringAllMutation.mutate()
+                : undefined
+            }
           />
         )}
 

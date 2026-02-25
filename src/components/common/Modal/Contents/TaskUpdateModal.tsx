@@ -51,23 +51,23 @@ const labelToFrequency = (label: string): RepeatType => {
 };
 
 const KOREAN_WEEKDAY_TO_JS: Record<string, number> = {
-  일: 0,
-  월: 1,
-  화: 2,
-  수: 3,
-  목: 4,
-  금: 5,
-  토: 6,
+  월: 0,
+  화: 1,
+  수: 2,
+  목: 3,
+  금: 4,
+  토: 5,
+  일: 6,
 };
 
 const SERVER_TO_KR_DAY: Record<number, string> = {
-  1: "일",
-  2: "월",
-  3: "화",
-  4: "수",
-  5: "목",
-  6: "금",
-  7: "토",
+  1: "월",
+  2: "화",
+  3: "수",
+  4: "목",
+  5: "금",
+  6: "토",
+  7: "일",
 };
 
 export default function TaskUpdateModal({
@@ -201,7 +201,7 @@ export default function TaskUpdateModal({
     selectDay?.label ?? frequencyToLabel(initialTask.frequencyType);
 
   return (
-    <div ref={modalRef} tabIndex={-1} className="p-5 outline-none">
+    <div ref={modalRef} tabIndex={-1} className="p-2 outline-none">
       <div className="flex flex-col">
         <div className="relative mb-5 flex items-center justify-center">
           <h2 className="text-2lg-b text-color-primary font-bold">
@@ -239,7 +239,7 @@ export default function TaskUpdateModal({
                 placeholder={dateString}
               />
               {isDateOpen && (
-                <div className="bg-background-primary ring-brand-primary absolute top-14 left-0 z-99 flex w-100 justify-center rounded-xl pb-2 shadow-2xl ring-1">
+                <div className="bg-background-primary ring-brand-primary absolute top-14 left-0 z-99 flex w-76 justify-center rounded-xl pb-2 shadow-2xl ring-1 md:w-82">
                   <CalendarDate
                     selectedDate={date}
                     onSelectDate={(d) => {
@@ -259,7 +259,7 @@ export default function TaskUpdateModal({
                 placeholder="시간 선택"
               />
               {isTimeOpen && (
-                <div className="bg-background-primary ring-brand-primary absolute top-14 right-0 z-99 flex w-100 justify-center rounded-xl p-4 shadow-2xl ring-1">
+                <div className="bg-background-primary ring-brand-primary absolute top-14 right-0 z-99 flex w-76 justify-center rounded-xl p-4 shadow-2xl ring-1 md:w-81">
                   <CalendarTime
                     selectedTime={time}
                     onSelectTime={(t) => {
@@ -303,7 +303,7 @@ export default function TaskUpdateModal({
                   key={item}
                   tabIndex={0}
                   onClick={() => toggleDay(item)}
-                  className={`text-sm-m flex h-11 w-12 cursor-pointer items-center justify-center rounded-xl border transition-all ${
+                  className={`text-sm-m mx-0.5 flex h-11 w-12 cursor-pointer items-center justify-center rounded-xl border transition-all ${
                     selectedDays.includes(item)
                       ? "bg-brand-primary border-brand-primary text-white"
                       : "text-color-primary border-border-primary hover:bg-background-secondary"
@@ -319,7 +319,7 @@ export default function TaskUpdateModal({
         {/* 월 반복은 서버가 monthDay(1~31)를 요구할 가능성이 높아서,
             UI에서 따로 “반복 일”을 받지 않아도, 선택한 날짜의 getDate()로 서버에 보냄 */}
 
-        <div className="mb-10 flex flex-col gap-2 text-left">
+        <div className="mb-5 flex flex-col gap-2 text-left">
           <label className="text-md-sb text-color-primary font-bold">
             할 일 메모
           </label>
