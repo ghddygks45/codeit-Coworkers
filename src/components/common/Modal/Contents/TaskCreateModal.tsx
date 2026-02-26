@@ -138,7 +138,7 @@ export default function TaskCreateModal({
 
     onCreate({
       title,
-      description: memo,
+      description: JSON.stringify({ taskListId: currentListId, memo }),
       startDate: finalStartDate,
       taskListId: currentListId,
       groupId: currentGroupId,

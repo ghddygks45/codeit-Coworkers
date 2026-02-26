@@ -225,6 +225,15 @@ export default function TaskListDetail() {
    * * - recurring.startDate가 있으면 유틸로 날짜/시간 문자열로 변환
    * - 없으면 "-" 표시
    */
+  const descriptionText = (() => {
+    try {
+      const parsed = JSON.parse(taskData?.description ?? "");
+      return parsed.memo ?? taskData?.description ?? "";
+    } catch {
+      return taskData?.description ?? "";
+    }
+  })();
+
   const startDate = taskData?.recurring?.startDate;
   const startDateText = startDate
     ? (() => {
@@ -427,9 +436,7 @@ export default function TaskListDetail() {
           <hr className="bg-border-primary h-[1px] border-0" />
 
           <div>
-            <p className="text-md-r text-color-primary">
-              {taskData?.description}
-            </p>
+            <p className="text-md-r text-color-primary">{descriptionText}</p>
           </div>
         </div>
 
