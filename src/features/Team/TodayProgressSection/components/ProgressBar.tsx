@@ -18,7 +18,7 @@ export default function ProgressBar({ percentage }: ProgressBarProps) {
           <div className="animate-progress-stripes h-full w-full rounded-l-full bg-[repeating-linear-gradient(135deg,#EBEFF5_0px,#EBEFF5_12px,#F1F5F9_12px,#F1F5F9_24px)]"></div>
         </div>
         <div
-          className="bg-brand-primary animate-progress-pulse absolute left-0 h-full rounded-full"
+          className="bg-brand-primary animate-progress-pulse absolute left-0 h-full rounded-full transition-[width] duration-700 ease-in-out"
           style={{ width: `${percentage}%` }}
         ></div>
       </div>
