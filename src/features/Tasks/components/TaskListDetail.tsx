@@ -130,10 +130,6 @@ export default function TaskListDetail() {
 
     // 사이드바 목록도 갱신
     queryClient.invalidateQueries({ queryKey: ["taskLists", groupIdNum] });
-
-    // 팀 페이지 갱신 (TaskColumn, TodayProgressSection)
-    queryClient.invalidateQueries({ queryKey: ["group", groupIdNum] });
-    queryClient.invalidateQueries({ queryKey: ["allTasks", groupIdNum] });
   };
 
   /** Task 완료 처리 */
