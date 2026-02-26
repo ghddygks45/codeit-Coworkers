@@ -26,6 +26,10 @@ export default function SignupPage() {
   });
 
   const passwordValue = useWatch({ control, name: "password" });
+  const passwordConfirmationValue = useWatch({
+    control,
+    name: "passwordConfirmation",
+  });
 
   const onSubmit = (data: SignUpRequest) => {
     signUp(data, {
@@ -113,7 +117,8 @@ export default function SignupPage() {
                   placeholder="비밀번호를 입력하세요"
                   onChange={(e) => {
                     onChange(e);
-                    trigger("passwordConfirmation");
+                    if (passwordConfirmationValue)
+                      trigger("passwordConfirmation");
                   }}
                 />
               )}
