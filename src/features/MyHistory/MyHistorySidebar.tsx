@@ -44,7 +44,7 @@ export default function MyHistorySidebar({
                       }`}
                     >
                       <span className="text-md-sb text-color-primary">
-                        {tasklist.name}
+                        {tasklist.name.replace("{status:doing}", "").trim()}
                       </span>
                       <span className="text-md-b text-brand-primary">
                         {count}개

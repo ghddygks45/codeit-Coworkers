@@ -77,7 +77,7 @@ export default function MyHistoryContent({
                         : "text-color-primary group-hover:text-color-inverse"
                     }`}
                   >
-                    {tasklist.name}
+                    {tasklist.name.replace("{status:doing}", "").trim()}
                   </span>
                   <span
                     className={`text-md-b md:text-lg-b ${
