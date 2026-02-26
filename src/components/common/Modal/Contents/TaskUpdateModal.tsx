@@ -79,8 +79,21 @@ export default function TaskUpdateModal({
   const { showError } = useToastStore();
   const initialDate = new Date(initialTask.startDate);
 
+  const parsedDescription = (() => {
+    try {
+      const parsed = JSON.parse(initialTask.description ?? "");
+      return {
+        memo: parsed.memo ?? initialTask.description ?? "",
+        taskListId: parsed.taskListId ?? null,
+      };
+    } catch {
+      return { memo: initialTask.description ?? "", taskListId: null };
+    }
+  })();
+
   const [title, setTitle] = useState(initialTask.title);
-  const [memo, setMemo] = useState(initialTask.description ?? "");
+  const [memo, setMemo] = useState(parsedDescription.memo);
+  const taskListId = parsedDescription.taskListId;
   const [date, setDate] = useState<Date | null>(initialDate);
   const [time, setTime] = useState(getDateTime(initialDate).timeString);
   const [selectDay, setSelectDay] = useState<{
@@ -187,7 +200,10 @@ export default function TaskUpdateModal({
     }
     onUpdate({
       title: title.trim(),
-      description: memo.trim(),
+      description:
+        taskListId !== null
+          ? JSON.stringify({ taskListId, memo: memo.trim() })
+          : memo.trim(),
       startDate: finalStartDate,
       frequencyType,
       weekDays: isRecurring && frequencyType === "WEEKLY" ? mappedWeekDays : [],
